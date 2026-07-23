@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Yizhang Mu — Research Foundations + Project Outline with live NYC Open Data, interactive D3 visualizations, and Mapbox spatial analysis." name="description"/>
+<title>The Invisible Boss, The Visible Street — Yizhang Mu</title>
+<link href="https://api.mapbox.com" rel="preconnect"/>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.26.0/mapbox-gl.css" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body>
+<div aria-hidden="true" class="scroll-progress"><span id="scrollProgress"></span></div>
+<header class="topbar assignment-topbar">
+<a aria-label="Return to title" class="brand" href="#title">
+<span>YIZHANG MU · COLUMBIA GSAPP CDP</span>
+<strong>THE INVISIBLE BOSS</strong>
+</a>
+<nav aria-label="Final assignment sections" class="assignment-nav">
+<a href="#questions">QUESTIONS</a>
+<a href="#keywords">KEYWORDS</a>
+<a href="#fields">FIELDS</a>
+<a href="#lineage">LINEAGE</a>
+<a href="#practice">PRACTICE</a>
+<a href="#situated">SITUATED</a>
+<a href="#methods">METHODS</a>
+<a href="#experiments">EXPERIMENTS</a>
+<a href="#visual">VISUAL</a>
+<a href="#argument">ARGUMENT</a>
+<a href="#capstone">CAPSTONE</a>
+<a href="#challenge">CHALLENGE</a>
+<a href="#exhibition">EXHIBITION</a>
+</nav>
+<button class="token-button" id="openTokenPanel"><i></i><span>MAPBOX</span></button>
+</header>
+<aside aria-hidden="true" class="token-panel" id="tokenPanel">
+<div class="token-panel-head">
+<div><span>MAPBOX CONNECTION</span><strong>Public access token</strong></div>
+<button aria-label="Close Mapbox token panel" id="closeTokenPanel">×</button>
+</div>
+<p>A project Mapbox public token is preconfigured. Replace it here only when needed.</p>
+<input autocomplete="off" id="tokenInput" placeholder="pk.eyJ1Ijo..." type="password"/>
+<div class="token-actions">
+<button id="connectMap">CONNECT MAP</button>
+<button id="clearToken">CLEAR</button>
+</div>
+<small aria-live="polite" id="tokenMessage">Mapbox connects automatically. Each section now identifies its question, evidence, interaction, and takeaway.</small>
+</aside>
+<main>
+<!-- TITLE -->
+<section class="cover" id="title">
+<div class="cover-grid"></div>
+<div class="cover-copy">
+<p class="eyebrow reveal">RESEARCH FOUNDATIONS + PROJECT OUTLINE</p>
+<h1 class="reveal delay-1">THE<br/>INVISIBLE<br/><em>BOSS.</em></h1>
+<p class="cover-subtitle reveal delay-2">The visible route is only one layer of a delivery worker’s shift.</p>
+<div class="author-block reveal delay-2">
+<span>YIZHANG MU · HE/HIM</span>
+<strong>COLUMBIA GSAPP · COMPUTATIONAL DESIGN PRACTICES · SUMMER 2026</strong>
+</div>
+</div><aside aria-label="title page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>PROJECT ORIENTATION</span><b>OFFICIAL DATA + LIVE PROTOTYPE</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What becomes invisible when delivery work is reduced to a route and an ETA?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Official NYC labor indicators, public restaurant records, and a live spatial prototype.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Hover over the indicators, then use the navigation to follow the argument.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The street is visible; the system governing the worker is not.</p></article></div></aside>
+<div aria-hidden="true" class="cover-diagram reveal delay-2">
+<svg viewbox="0 0 740 680">
+<defs><filter id="redGlow"><fegaussianblur result="blur" stddeviation="5"></fegaussianblur><femerge><femergenode in="blur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge></filter></defs>
+<path class="street-line faint" d="M55 590L170 520L300 545L385 450L535 470L680 365"></path>
+<path class="street-line" d="M80 610L190 475L325 500L405 390L555 405L670 245"></path>
+<path class="route-line" d="M105 570C190 470 245 540 320 465S465 420 505 350S595 325 650 205"></path>
+<g class="diagram-node"><circle cx="105" cy="570" r="9"></circle><text x="105" y="605">ORDER</text></g>
+<g class="diagram-node"><circle cx="320" cy="465" r="9"></circle><text x="320" y="500">WAIT</text></g>
+<g class="diagram-node"><circle cx="505" cy="350" r="9"></circle><text x="505" y="385">RISK</text></g>
+<g class="diagram-node"><circle cx="650" cy="205" r="9"></circle><text x="650" y="240">DELIVERY</text></g>
+<text class="ghost-number" x="20" y="120">00</text>
+<text class="diagram-label" x="330" y="95">THE PLATFORM RECORDS A ROUTE.</text>
+<text class="diagram-label red" x="330" y="122">THE WORKER EXPERIENCES A SHIFT.</text>
+</svg>
+</div>
+<div class="cover-footer">
+<span>NYC · PLATFORM LABOR · MAPBOX · D3</span>
+<a href="#questions">BEGIN ↓</a>
+</div>
+<div class="foundation-viz hero-metrics reveal delay-2">
+<div class="foundation-viz-head"><div><span>NYC DELIVERY SYSTEM · OFFICIAL INDICATORS</span><h3>THE SCALE BEHIND ONE ORDER</h3></div><small>HOVER TO INSPECT</small></div>
+<div class="mini-chart" id="titleMetricsChart"></div>
+<p class="source-note">Sources: <a href="https://www.nyc.gov/site/dca/workers/Delivery-Worker-Public-Hearing-Minimum-Pay-Rate.page" rel="noopener" target="_blank">NYC DCWP minimum pay</a>; <a href="https://comptroller.nyc.gov/reports/safeguarding-outdoor-workers-in-a-changing-climate/" rel="noopener" target="_blank">NYC Comptroller worker estimate</a>; <a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q2-2024.pdf" rel="noopener" target="_blank">DCWP Q2 2024 app data</a>.</p>
+</div>
+</section>
+<!-- RESEARCH QUESTIONS -->
+<section class="question section" id="questions">
+<div class="section-number">01</div>
+<div class="question-copy reveal">
+<p class="eyebrow">RESEARCH QUESTIONS</p>
+<h2>WHO CONTROLS<br/>THE STREET<br/><em>WHEN THE BOSS<br/>IS AN INTERFACE?</em></h2>
+</div>
+<div class="question-support reveal delay-1">
+<p>How do delivery platforms translate movement, waiting, risk, and bodily labor into data—and what remains outside the record?</p>
+<div class="question-mini-grid">
+<div><span>SOCIO-TECHNICAL</span><b>Who sets the rules?</b></div>
+<div><span>URBAN</span><b>Where does risk accumulate?</b></div>
+<div><span>POLICY</span><b>What should workers contest?</b></div>
+</div>
+</div><aside aria-label="questions page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>OFFICIAL NYC DATA</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How do platforms translate movement, waiting, risk, and bodily labor into data?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>DCWP reports separate active trip time from on-call time, revealing labor outside the route.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Toggle between total weekly hours and percentage share.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>A completed trip does not represent the worker’s entire shift.</p></article></div></aside>
+<div class="question-axis reveal delay-2">
+<div><span>PLATFORM SEES</span><strong>ORDER · DISTANCE · ETA · FEE</strong></div>
+<i></i>
+<div><span>WORKER EXPERIENCES</span><strong>WAIT · RISK · BATTERY · BODY</strong></div>
+</div>
+<div class="foundation-viz question-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · WEEKLY LABOR TIME</span><h3>ACTIVE DELIVERY TIME IS NOT THE WHOLE SHIFT.</h3></div><button class="viz-toggle" id="questionMode">SHOW SHARE</button></div>
+<div class="mini-chart" id="questionsChart"></div>
+<p class="source-note">Source: <a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q1-2024.pdf" rel="noopener" target="_blank">DCWP Restaurant Delivery App Data, Q1 2024</a> — 908,000 weekly trip hours and 560,000 weekly on-call hours.</p>
+</div>
+</section>
+<!-- KEYWORDS -->
+<section class="section keywords-section" id="keywords">
+<div class="section-number">02</div>
+<div class="section-intro reveal"><p class="eyebrow">KEYWORDS · 5</p><h2>FIVE TERMS<br/>FRAME THE PROJECT.</h2></div><aside aria-label="keywords page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHORED CONCEPTUAL FRAMEWORK</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Which five concepts organize the research?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>An authored framework connects course readings, labor policy, spatial data, and interface design.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each keyword to see its role in the project.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Worker power links the project’s questions about labor, data, streets, policy, and interfaces.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · AUTHORED CONCEPT MAP</span><h3>FIVE KEYWORDS, FOUR EVIDENCE TYPES.</h3></div><small>CLICK A KEYWORD</small></div>
+<div class="viz-split"><div class="network-chart" id="keywordsChart"></div><div class="viz-readout" id="keywordsReadout"><span>SELECTED KEYWORD</span><h3>ALGORITHMIC MANAGEMENT</h3><p>How platforms convert rules into rankings, dispatch, pay, and discipline.</p></div></div>
+<p class="source-note">Authored coding framework connecting the project’s five keywords to spatial, labor, policy, and interface evidence.</p>
+</div>
+</section>
+<!-- INTERSECTING FIELDS -->
+<section class="section fields-section" id="fields">
+<div class="section-number">03</div>
+<div class="section-intro reveal"><p class="eyebrow">INTERSECTING FIELDS</p><h2>THE PROJECT SITS<br/>BETWEEN SYSTEMS.</h2><p>It connects computation, labor politics, urban design, data ethics, and interface design.</p></div><aside aria-label="fields page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHORED RESEARCH MAP</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Why can this project not be understood through computation alone?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>The network maps the methods and evidence shared by design, labor studies, mobility, ethics, and policy.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Drag or click a field to inspect its contribution.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The technical instrument must be developed together with labor, ethical, and spatial analysis.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · AUTHORED FIELD MAP</span><h3>THE PROJECT IS A CROSS-DISCIPLINARY SYSTEM.</h3></div><small>DRAG OR CLICK NODES</small></div>
+<div class="viz-split"><div class="network-chart" id="fieldsChart"></div><div class="viz-readout" id="fieldsReadout"><span>ACTIVE FIELD</span><h3>COMPUTATIONAL DESIGN</h3><p>Builds the technical instrument while questioning what the instrument measures.</p></div></div>
+<p class="source-note">Links are coded from the project bibliography, precedent study, software workflow, and policy context.</p>
+</div>
+</section>
+<!-- HISTORICAL LINEAGE -->
+<section class="section lineage-section" id="lineage">
+<div class="section-number">04</div>
+<div class="section-intro reveal"><p class="eyebrow">HISTORICAL LINEAGE</p><h2>FROM MEASURING<br/>THE WORKER TO<br/>CONTESTING THE MEASURE.</h2></div><aside aria-label="lineage page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>SOURCED HISTORICAL TIMELINE</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What historical trajectory does the project continue and contest?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A sourced timeline moves from scientific management to cybernetics, platform governance, and worker data rights.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click an event to read how its idea of measurement changes labor control.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The project turns tools of measurement into tools for inspecting and contesting measurement.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · INTERACTIVE TIMELINE</span><h3>FROM TIME STUDY TO DATA RIGHTS.</h3></div><small>CLICK AN EVENT</small></div>
+<div class="timeline-chart" id="lineageChart"></div>
+<div class="timeline-readout" id="lineageReadout"><span>2026 · WORKER RIGHTS</span><h3>$22.13 MINIMUM PAY RATE</h3><p>NYC requires app-based restaurant and grocery delivery workers to receive at least $22.13 per hour for covered time, excluding tips.</p></div>
+<p class="source-note">Sources include Taylor (1911), Wiener (1948), Critical Engineering Manifesto (2011), Data Feminism (2020), and NYC DCWP delivery-worker rules.</p>
+</div>
+<div class="precedent-fork reveal delay-2"><span>PRECEDENT STUDY → FORENSIC ARCHITECTURE</span><strong>FORK: FROM RECONSTRUCTING A PAST EVENT TO CONTESTING A LIVE SYSTEM.</strong></div>
+</section>
+<!-- COMMUNITY OF PRACTICE -->
+<section class="section practice-section" id="practice">
+<div class="section-number">05</div>
+<div class="section-intro reveal"><p class="eyebrow">COMMUNITY OF PRACTICE</p><h2>WHO IS ALREADY<br/>WORKING IN THIS SPACE?</h2></div><aside aria-label="practice page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>CURATED PRECEDENTS + POSITIONING</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Who is already working on spatial evidence, worker organizing, and data rights?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A selected community of practice compares six projects, authors, and organizations that shape my position.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click a practice to see what I adapt, extend, or question.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>My position combines spatial evidence with worker-centered data access and collective power.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · CURATED PRACTICE MAP</span><h3>POSITIONING THE PROJECT AMONG ALLIES AND CRITIQUES.</h3></div><small>CLICK A PRACTICE</small></div>
+<div class="viz-split"><div class="network-chart" id="practiceChart"></div><div class="viz-readout" id="practiceReadout"><span>MY POSITION</span><h3>INTERFACE FOR CONTESTATION</h3><p>The project combines spatial evidence, worker organizing, critical data practice, and public communication.</p></div></div>
+<p class="source-note">Selected community: Forensic Architecture, Data Feminism, Critical Engineering, Platform Cooperativism, Los Deliveristas Unidos, and Worker Info Exchange.</p>
+</div>
+<div class="audience-strip reveal delay-2"><span>AUDIENCE</span><b>DELIVERY WORKERS</b><b>LABOR ORGANIZERS</b><b>POLICY RESEARCHERS</b><b>THE PUBLIC</b></div>
+</section>
+<!-- SITUATED TECHNOLOGY -->
+<section class="section situated-section" id="situated">
+<div class="section-number">06</div>
+<div class="section-intro reveal"><p class="eyebrow">SITUATED TECHNOLOGY</p><h2>THE ORDER IS NEVER<br/>JUST AN ORDER.</h2><p>Every delivery is situated within a worker’s body, a street, a restaurant, a battery, weather, policy, and platform rules.</p></div><aside aria-label="situated page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>LIVE CONTEXT DATA + AUTHORED MODEL</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How is platform labor situated within a specific urban environment?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Live restaurant locations provide spatial context; the visibility index is an explicitly authored analytical model.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Switch the Mapbox layer and click the D3 bars to compare visible and hidden system layers.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>A delivery is shaped by uneven streets, businesses, infrastructure, rules, and bodies—not software alone.</p></article></div></aside>
+<div class="situated-data-grid reveal delay-1">
+<div class="foundation-viz map-context-panel">
+<div class="foundation-viz-head"><div><span>MAPBOX · SITUATED DENSITY</span><h3>RESTAURANTS ARE UNEVENLY DISTRIBUTED.</h3></div><div class="map-mode-buttons"><button class="active" data-context-layer="density">DENSITY</button><button data-context-layer="gradeC">GRADE C</button></div></div>
+<div class="context-map-shell"><div id="contextMap"></div><div class="context-map-placeholder" id="contextMapPlaceholder"><span>CONNECTING MAPBOX</span><p>The project token is preconfigured. This spatial layer will appear automatically.</p></div></div>
+</div>
+<div class="foundation-viz">
+<div class="foundation-viz-head"><div><span>D3 · AUTHORED VISIBILITY MODEL</span><h3>NOT EVERY PART OF THE SYSTEM IS EQUALLY VISIBLE.</h3></div><small>CLICK A BAR</small></div>
+<div class="mini-chart" id="situatedChart"></div>
+<div class="viz-readout compact" id="situatedReadout"><span>SELECTED LAYER</span><h3>PLATFORM RULES</h3><p>High operational power, low public visibility.</p></div>
+</div>
+</div>
+<p class="source-note wide-source">Live spatial source: <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" rel="noopener" target="_blank">NYC DOHMH Restaurant Inspection Results</a>. Visibility index: authored analytical framework.</p>
+</section>
+<!-- METHODS -->
+<section class="methods section methods-expanded" id="methods">
+<div class="section-number">07</div>
+<div class="methods-title reveal"><p class="eyebrow">METHODS</p><h2>TRACE THE ORDER.<br/>EXPOSE THE GAP.</h2></div><aside aria-label="methods page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>COMPLETED METHODS + PROPOSED METHODS</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How will the project produce and evaluate evidence?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Public records and route APIs are combined with future worker accounts, field observation, and material representation.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Read the pipeline, then inspect the live data-quality audit.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Missing data is not hidden; it becomes part of the research question and method.</p></article></div></aside>
+<div class="method-quadrants reveal delay-1">
+<article><span>QUANTITATIVE</span><h3>PUBLIC DATA</h3><p>Restaurant records, routes, time, distance, score distributions.</p></article>
+<article><span>QUALITATIVE</span><h3>WORKER ACCOUNTS</h3><p>Interviews, screenshots, field observation, route annotation.</p></article>
+<article><span>COMPUTATIONAL</span><h3>MAPBOX + D3</h3><p>Socrata API, GeoJSON, cross-filtering, scenario comparison.</p></article>
+<article><span>MATERIAL</span><h3>DRAWING + RECEIPT</h3><p>Printed datascape, physical evidence object, live interface.</p></article>
+</div>
+<div class="pipeline reveal delay-2">
+<article><span>01</span><h3>LOAD</h3><p>Request NYC public records.</p><small>REAL DATA</small></article>
+<article><span>02</span><h3>LOCATE</h3><p>Transform coordinates to GeoJSON.</p><small>MAPBOX</small></article>
+<article><span>03</span><h3>ROUTE</h3><p>Calculate a cycling path.</p><small>DIRECTIONS API</small></article>
+<article><span>04</span><h3>COMPARE</h3><p>Contrast visible and hidden labor.</p><small>D3 MODEL</small></article>
+</div>
+<div class="method-formats reveal delay-2"><span>LIKELY FORM</span><b>INTERACTIVE SOFTWARE</b><b>PRINTED DRAWING</b><b>PHYSICAL OBJECT</b><b>WRITTEN ARGUMENT</b></div>
+<div class="foundation-viz methods-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · DATA QUALITY AUDIT</span><h3>METHOD BEGINS BY INSPECTING THE DATASET ITSELF.</h3></div><small>LIVE AFTER DATABASE LOAD</small></div>
+<div class="mini-chart" id="methodsChart"></div>
+<div class="methods-metrics" id="methodsMetrics"><div><span>RECORDS</span><b>—</b></div><div><span>GEOCODED</span><b>—</b></div><div><span>WITH SCORE</span><b>—</b></div><div><span>CUISINES</span><b>—</b></div></div>
+<p class="source-note">Live audit of <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" rel="noopener" target="_blank">NYC Open Data dataset 43nn-pn8j</a>. Missingness is treated as part of the method, not hidden.</p>
+</div>
+</section>
+<!-- COMPUTATIONAL DESIGN EXPERIMENTS -->
+<section class="interface section" id="experiments">
+<div class="interface-head reveal">
+<div>
+<p class="eyebrow">08A · COMPUTATIONAL DESIGN EXPERIMENT</p>
+<h2>LIVE DATA.<br/>CONTESTED REALITIES.</h2>
+</div>
+<div class="live-status" id="dataStatus"><i></i><div><span>NYC OPEN DATA</span><strong>CONNECTING</strong></div></div>
+</div>
+<aside aria-label="experiments page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>LIVE DATA + TRANSPARENT PROTOTYPE</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What can the current computational prototype reveal?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Live NYC records and Mapbox routes are kept separate from modeled pay, risk, battery, and menu values.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Filter restaurants, select a point, create a route, and compare the linked D3 views.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The prototype demonstrates how a public interface can expose both evidence and the limits of its evidence.</p></article></div></aside><div class="data-truth reveal delay-1">
+<span class="truth real">REAL</span><p>Restaurant identity, inspection record, coordinates, Mapbox basemap, and Mapbox route.</p>
+<span class="truth model">MODELED</span><p>Menu, fees, worker-pay formula, risk index, and battery use.</p>
+<span class="truth input">USER INPUT</span><p>Destination, waiting time, tip, and scenario settings.</p>
+</div>
+<div class="tool-shell reveal delay-1">
+<div class="map-side">
+<div class="tool-toolbar">
+<label class="search-control"><span>SEARCH</span><input id="searchInput" placeholder="restaurant, cuisine, street" type="search"/></label>
+<label><span>BOROUGH</span><select id="boroughFilter"><option value="ALL">ALL BOROUGHS</option></select></label>
+<label><span>GRADE</span><select id="gradeFilter"><option value="ALL">ALL GRADES</option><option value="A">GRADE A</option><option value="B">GRADE B</option><option value="C">GRADE C</option></select></label>
+<button id="resetFilters">RESET</button>
+</div>
+<div class="map-shell">
+<div aria-label="Interactive Mapbox map of New York City restaurant records" id="map"></div>
+<div class="map-placeholder" id="mapPlaceholder">
+<div><span>MAPBOX IS NOT CONNECTED</span><h3>D3 and the database are live.</h3><p>Add a public Mapbox token to reveal spatial points and cycling routes.</p><button id="placeholderTokenButton">ADD TOKEN</button></div>
+</div>
+<div class="map-legend"><span><i class="grade-a"></i>A</span><span><i class="grade-b"></i>B</span><span><i class="grade-c"></i>C</span><span><i class="route-key"></i>CYCLING ROUTE</span></div>
+<div class="map-instruction">SELECT RESTAURANT → SET DESTINATION</div>
+</div>
+</div>
+<aside class="order-side">
+<div class="order-head"><span>PLATFORM ORDER VIEW</span><strong id="resultCount">0 RECORDS</strong></div>
+<div class="selected-card" id="selectedRestaurant">
+<small>SELECTED RESTAURANT</small>
+<h3>Choose a point on the map</h3>
+<p>Or use one of the real restaurant records below the D3 charts.</p>
+</div>
+<div class="route-controls">
+<button disabled="" id="routeToColumbia">ROUTE TO COLUMBIA</button>
+<button disabled="" id="clearRoute">CLEAR ROUTE</button>
+</div>
+<div class="route-metrics">
+<div><span>DISTANCE</span><b id="distanceValue">—</b><small>REAL ROUTE</small></div>
+<div><span>BIKE ETA</span><b id="durationValue">—</b><small>REAL ROUTE</small></div>
+<div><span>BASE PAY</span><b id="payValue">—</b><small>MODELED</small></div>
+</div>
+<div class="menu-heading"><div><span>ORDER INTERFACE</span><small>prototype menu</small></div><b id="cartCount">0</b></div>
+<div class="menu-list" id="menuList"><div class="empty-state">Select a restaurant to generate a clearly labeled prototype menu.</div></div>
+<div class="cart-box">
+<div class="cart-items" id="cartItems"><p>Cart is empty.</p></div>
+<label class="tip-control"><span>TIP <b id="tipLabel">15%</b></span><input id="tipSlider" max="30" min="0" type="range" value="15"/></label>
+<div class="cart-total"><span>CUSTOMER TOTAL</span><b id="cartTotal">$0.00</b></div>
+<button disabled="" id="placeOrder">CREATE PROTOTYPE ORDER</button>
+</div>
+</aside>
+</div>
+<div class="d3-head reveal">
+<div><p class="eyebrow">LINKED D3 VIEWS</p><h3>FILTER THE DATABASE,<br/>NOT JUST THE MAP.</h3></div>
+<label><input id="syncViewport" type="checkbox"/> SYNC CHARTS TO MAP VIEW</label>
+</div>
+<div class="charts reveal delay-1">
+<article class="chart-card">
+<header><div><span>D3 BAR CHART</span><h4>Top cuisines</h4></div><small>CLICK TO FILTER</small></header>
+<div class="chart" id="cuisineChart"></div>
+</article>
+<article class="chart-card">
+<header><div><span>D3 DONUT</span><h4>Inspection grades</h4></div><small>CLICK TO FILTER</small></header>
+<div class="chart" id="gradeChart"></div>
+</article>
+<article class="chart-card wide">
+<header><div><span>D3 HISTOGRAM + BRUSH</span><h4>Inspection score distribution</h4></div><small>DRAG TO FILTER</small></header>
+<div class="chart" id="scoreChart"></div>
+<div class="score-label" id="scoreLabel">ALL SCORES</div>
+</article>
+</div>
+<div class="restaurant-browser reveal">
+<div class="browser-head"><span>REAL RESTAURANT RECORDS</span><small>SELECT A RECORD TO BEGIN A DELIVERY CASE</small></div>
+<div class="restaurant-strip" id="restaurantStrip"><div class="loading-records">Loading restaurant records…</div></div>
+</div>
+</section>
+<section class="case section" id="delivery-case">
+<div class="case-head reveal">
+<div><p class="eyebrow">08B · ONE DELIVERY / TWO RECORDS</p><h2>WHAT THE PLATFORM<br/>COUNTS—AND WHAT<br/>IT LEAVES OUT.</h2></div>
+<div class="case-identity" id="caseIdentity"><span>ACTIVE CASE</span><strong>SELECT A RESTAURANT</strong><p>Route to a destination to populate this case with real spatial metrics.</p></div>
+</div><aside aria-label="delivery-case page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>REAL ROUTE + USER-CONTROLLED SCENARIO</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What changes when one delivery is read as a worker’s experience rather than a platform record?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Real route distance and duration are combined with clearly labeled scenario inputs for waiting, pickup, and risk.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Adjust the sliders and watch the effective hourly pay, hidden time, battery, and risk change.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Time omitted by the platform can materially change how the same delivery is valued.</p></article></div></aside>
+<div class="scenario-controls reveal delay-1">
+<label><span>RESTAURANT WAIT <b id="waitLabel">8 MIN</b></span><input id="waitSlider" max="25" min="0" type="range" value="8"/></label>
+<label><span>PICKUP / PARKING <b id="pickupLabel">4 MIN</b></span><input id="pickupSlider" max="15" min="0" type="range" value="4"/></label>
+<label><span>STREET RISK <b id="riskLabel">40%</b></span><input id="riskSlider" max="100" min="0" type="range" value="40"/></label>
+<p>These red controls are explicit scenario inputs—not hidden claims about workers.</p>
+</div>
+<div class="reality-grid reveal delay-1">
+<article class="record platform-record">
+<header><span>PLATFORM RECORD</span><small>WHAT THE INTERFACE COUNTS</small></header>
+<div class="record-primary"><strong id="platformTime">—</strong><span>ROUTE MINUTES</span></div>
+<div class="record-row"><span>DISTANCE</span><b id="platformDistance">—</b></div>
+<div class="record-row"><span>ORDER PAY</span><b id="platformPay">—</b></div>
+<div class="record-row"><span>WAITING</span><b>0 MIN</b></div>
+<div class="record-row"><span>RISK</span><b>NOT PRICED</b></div>
+</article>
+<article class="record worker-record">
+<header><span>WORKER EXPERIENCE</span><small>WHAT THE BODY ABSORBS</small></header>
+<div class="record-primary"><strong id="workerTime">—</strong><span>TOTAL MINUTES</span></div>
+<div class="record-row"><span>UNPAID / HIDDEN TIME</span><b id="hiddenTime">12 MIN</b></div>
+<div class="record-row"><span>EFFECTIVE HOURLY PAY</span><b id="hourlyPay">—</b></div>
+<div class="record-row"><span>BATTERY USE</span><b id="batteryUse">—</b></div>
+<div class="record-row"><span>STREET RISK</span><b id="workerRisk">40%</b></div>
+</article>
+<article class="visibility-chart-card">
+<header><span>D3 COMPARISON</span><small>REAL ROUTE + TRANSPARENT SCENARIO INPUTS</small></header>
+<div id="visibilityChart"></div>
+</article>
+</div>
+<div class="case-equation reveal delay-2">
+<span>THE GAP</span>
+<strong id="gapStatement">SELECT A ROUTE TO CALCULATE INVISIBLE LABOR.</strong>
+</div>
+</section>
+<!-- VISUAL REPRESENTATION -->
+<section class="section visual-section" id="visual">
+<div class="section-number">09</div>
+<div class="section-intro reveal"><p class="eyebrow">VISUAL REPRESENTATION</p><h2>AESTHETICS<br/>AS EVIDENCE.</h2><p>The visual language borrows from dispatch systems, forensic diagrams, warning interfaces, receipts, and night streets.</p></div><aside aria-label="visual page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHORED REPRESENTATIONAL SYSTEM</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How does the visual language participate in the argument?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Color, line weight, layering, receipts, and warning-interface conventions encode visibility, risk, and authority.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Move the risk slider to test how the visual system responds.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Aesthetics is used to investigate and communicate power, not simply to decorate the data.</p></article></div></aside>
+<div class="visual-language reveal delay-1">
+<article class="palette-card"><span>PALETTE</span><div class="swatches"><i></i><i></i><i></i><i></i></div><h3>BLACK · OXIDE RED<br/>ALERT RED · PAPER WHITE</h3></article>
+<article class="trace-card"><span>TRACE</span><svg viewbox="0 0 500 220"><path d="M20 190C110 70 155 205 235 105S380 125 475 25"></path><circle cx="20" cy="190" r="7"></circle><circle cx="235" cy="105" r="7"></circle><circle cx="475" cy="25" r="7"></circle></svg><h3>ROUTES BECOME ARGUMENTS.</h3></article>
+<article class="layer-card"><span>LAYERS</span><div><b>PLATFORM</b><b>STREET</b><b>WORKER</b><b>POLICY</b></div><h3>SEPARATE WHAT THE INTERFACE COLLAPSES.</h3></article>
+<article class="type-card"><span>TYPE</span><strong>DATA<br/>IS NEVER<br/>NEUTRAL.</strong></article>
+</div>
+<div class="foundation-viz visual-encoding-viz reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · AUTHOR ENCODING TEST</span><h3>CHANGE THE RISK LEVEL TO TEST THE VISUAL LANGUAGE.</h3></div><label class="risk-demo-control">RISK <b id="visualRiskLabel">40%</b><input id="visualRiskSlider" max="100" min="0" type="range" value="40"/></label></div>
+<div class="mini-chart" id="visualEncodingChart"></div>
+<p class="source-note">Authored encoding system: risk controls saturation, line weight, alert density, and annotation intensity.</p>
+</div>
+</section>
+<!-- RHETORICAL ARGUMENT -->
+<section class="argument section argument-only" id="argument">
+<div class="section-number">10</div>
+<div class="argument-copy reveal">
+<p class="eyebrow">RHETORICAL ARGUMENT</p>
+<h2>TRANSPARENCY<br/>IS NOT<br/><em>ENOUGH.</em></h2>
+<p>Workers need the power to inspect, contest, and govern the systems that measure them.</p>
+</div><aside aria-label="argument page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>POLICY DATA + PROJECT SYNTHESIS</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What does the project ultimately argue?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Policy data shows changing pay structures; the delivery case shows why visibility alone does not create agency.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Toggle the chart, then follow the sequence: see, question, contest, govern.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Workers need the ability to inspect and challenge records—not only to be shown more information.</p></article></div></aside>
+<div class="argument-ladder reveal delay-1">
+<div><span>SEE</span><b>Make hidden labor visible.</b></div>
+<div><span>QUESTION</span><b>Expose how the metric is made.</b></div>
+<div><span>CONTEST</span><b>Allow workers to challenge the record.</b></div>
+<div><span>GOVERN</span><b>Shift control over data and rules.</b></div>
+</div>
+<div class="foundation-viz argument-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · POLICY OUTCOME</span><h3>PAY ROSE, WHILE TIPS FELL.</h3></div><button class="viz-toggle" id="argumentMode">SHOW TOTAL</button></div>
+<div class="mini-chart" id="argumentChart"></div>
+<p class="source-note">Source: <a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q2-2024.pdf" rel="noopener" target="_blank">DCWP Q2 2024 app data</a> — pay per hour rose from $5.25 to $19.88; tips fell from $5.37 to $2.60.</p>
+</div>
+</section>
+<!-- POTENTIAL CAPSTONE -->
+<section class="section capstone-section" id="capstone">
+<div class="section-number">11</div>
+<div class="section-intro reveal"><p class="eyebrow">POTENTIAL CAPSTONE · NOT A FIXED SOLUTION</p><h2>A WORKER-CENTERED<br/>URBAN OBSERVATORY.</h2><p>A participatory research system combining delivery traces, testimony, street conditions, and policy data.</p></div><aside aria-label="capstone page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>PROVISIONAL RESEARCH ROADMAP</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Where could this research develop without proposing a premature solution?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A provisional roadmap sequences listening, consent, field research, prototyping, and public presentation.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each phase to see its purpose and dependency.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The next stage begins with relationships and consent before software development.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · CAPSTONE ROADMAP</span><h3>A RESEARCH SEQUENCE, NOT A PREMATURE SOLUTION.</h3></div><small>CLICK A PHASE</small></div>
+<div class="roadmap-chart" id="capstoneChart"></div>
+<div class="timeline-readout" id="capstoneReadout"><span>PHASE 01 · LISTEN</span><h3>RELATIONSHIPS BEFORE SOFTWARE</h3><p>Build trust, establish consent, and identify what workers want documented or kept private.</p></div>
+<p class="source-note">Authored project plan for Fall 2026–Spring 2027; timing is provisional and contingent on partnerships.</p>
+</div>
+<p class="capstone-caution reveal delay-2">The next semester begins with listening and partnership—not with assuming the final solution.</p>
+</section>
+<!-- CHALLENGE -->
+<section class="section challenge-section" id="challenge">
+<div class="section-number">12</div>
+<div class="section-intro reveal"><p class="eyebrow">THE CHALLENGE</p><h2>THE AMBITION IS<br/>LARGER THAN THE<br/>CURRENT DATA.</h2></div><aside aria-label="challenge page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHOR SELF-ASSESSMENT</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What currently prevents the project from fully supporting its ambition?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>An explicit author self-assessment compares impact and readiness across trust, data, technology, representation, and policy.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each point to inspect the limitation and the next required step.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Worker trust, consent, and data governance are harder—and more important—than adding technical features.</p></article></div></aside>
+<div class="challenge-grid reveal delay-1">
+<article><span>RELATIONSHIPS</span><h3>BUILD TRUST</h3><p>Worker participation cannot be extracted on a studio schedule.</p></article>
+<article><span>DATA</span><h3>FIND THE MISSING RECORD</h3><p>Waiting, risk, and deactivation are rarely public.</p></article>
+<article><span>TECHNICAL</span><h3>PROTECT SENSITIVE TRACES</h3><p>Location data requires security, consent, and careful access.</p></article>
+<article><span>REPRESENTATION</span><h3>AVOID SPEAKING FOR WORKERS</h3><p>The interface must make room for disagreement and refusal.</p></article>
+</div>
+<div class="forward-plan reveal delay-2"><span>FORWARD PLAN</span><div><b>NOW</b><p>Strengthen Mapbox, D3, and visual argument.</p></div><div><b>NEXT</b><p>Interview, observe, and co-design with workers.</p></div><div><b>LATER</b><p>Prototype secure, worker-governed data infrastructure.</p></div></div>
+<div class="foundation-viz challenge-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · AUTHOR SELF-ASSESSMENT</span><h3>THE HARDEST PROBLEMS ARE NOT ALL TECHNICAL.</h3></div><small>CLICK A CHALLENGE</small></div>
+<div class="viz-split"><div class="matrix-chart" id="challengeChart"></div><div class="viz-readout" id="challengeReadout"><span>HIGHEST PRIORITY</span><h3>WORKER TRUST</h3><p>High impact, low current readiness. The next step is relationship-building rather than feature-building.</p></div></div>
+<p class="source-note">Self-assessment scored from 1–5 for project impact and current readiness; intended to make limitations explicit.</p>
+</div>
+</section>
+<!-- EXHIBITION COMPONENTS -->
+<section class="section exhibition-section" id="exhibition">
+<div class="section-number">13</div>
+<div class="section-intro reveal"><p class="eyebrow">EXHIBITION COMPONENTS</p><h2>BEYOND<br/>THE SCREEN.</h2></div><aside aria-label="exhibition page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>EXHIBITION PROPOSAL + SCALED PLAN</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How will the argument extend beyond the website?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A scaled installation plan combines a vertical datascape, a material receipt object, and an optional live screen.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each component to understand its content, scale, and role.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The website explains the system; the drawing and object make hidden time and labor physically present.</p></article></div></aside>
+<div class="exhibition-grid reveal delay-1">
+<article class="drawing-plan"><span>PRINTED VERTICAL DRAWING</span><h3>THE ANATOMY<br/>OF A DELIVERY</h3><div class="drawing-preview"><i></i><i></i><i></i><i></i><b>PLATFORM<br/>STREET<br/>WORKER<br/>POLICY</b></div><p>36 × 72 in · vertical · matte print · suspended in Avery 100.</p></article>
+<article class="material-plan"><span>MATERIAL-SPATIAL GESTURE</span><h3>THE RECEIPT OF AN<br/>INVISIBLE SHIFT</h3><div class="receipt-preview"><b>ORDER TOTAL</b><em>$18.42</em><hr/><small>WAITING +11:08</small><small>BATTERY −21%</small><small>RISK NOT PRICED</small><small>UNPAID TIME +15:00</small></div><p>Delivery bag + extended thermal receipt + black plinth.</p></article>
+<article class="screen-plan"><span>OPTIONAL SECOND SCREEN</span><h3>ONE ORDER,<br/>TWO REALITIES</h3><div class="screen-preview"><i></i><strong>MAPBOX × D3</strong><small>LIVE DEMO + BACKUP VIDEO</small></div><p>Interactive route, data filters, and platform/worker comparison.</p></article>
+</div>
+<div class="submission-strip reveal delay-2"><span>FINAL REVIEW</span><b>WEBSITE</b><b>PRINTED DRAWING</b><b>MATERIAL GESTURE</b><b>LIVE PRESENTATION</b></div>
+<div class="source-library reveal delay-2"><span>CORE DATA SOURCES</span><a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" rel="noopener" target="_blank">NYC DOHMH RESTAURANTS ↗</a><a href="https://www.nyc.gov/site/dca/workers/Delivery-Worker-Public-Hearing-Minimum-Pay-Rate.page" rel="noopener" target="_blank">DCWP MINIMUM PAY ↗</a><a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q2-2024.pdf" rel="noopener" target="_blank">DCWP APP DATA ↗</a><a href="https://comptroller.nyc.gov/reports/safeguarding-outdoor-workers-in-a-changing-climate/" rel="noopener" target="_blank">OUTDOOR WORKERS REPORT ↗</a></div><footer class="project-footer"><span>THE INVISIBLE BOSS, THE VISIBLE STREET</span><span>YIZHANG MU · 2026</span><a href="#title">BACK TO TOP ↑</a></footer>
+<div class="foundation-viz exhibition-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · SCALED INSTALLATION PLAN</span><h3>ONE DRAWING, ONE OBJECT, ONE LIVE SCREEN.</h3></div><small>CLICK A COMPONENT</small></div>
+<div class="viz-split"><div class="installation-chart" id="exhibitionChart"></div><div class="viz-readout" id="exhibitionReadout"><span>PRINTED DRAWING</span><h3>36 × 72 INCH VERTICAL DATASCAPE</h3><p>Suspended from the Avery 100 rail; the route becomes the spine connecting platform, street, worker, and policy layers.</p></div></div>
+<p class="source-note">Authored setup dimensions and final-review requirements; verify rail height and available table footprint before printing.</p>
+</div>
+</section>
+</main>
+<div class="confirmation" hidden="" id="confirmation">
+<div class="confirmation-card">
+<span>PROTOTYPE ORDER CREATED</span>
+<h2 id="orderNumber">ORDER #000000</h2>
+<p>This interaction was stored only in your browser. No payment was processed and no restaurant was contacted.</p>
+<button id="closeConfirmation">RETURN TO THE TOOL</button>
+</div>
+</div>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.26.0/mapbox-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

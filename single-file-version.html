@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Yizhang Mu — Research Foundations + Project Outline with live NYC Open Data, interactive D3 visualizations, and Mapbox spatial analysis." name="description"/>
+<title>The Invisible Boss, The Visible Street — Yizhang Mu</title>
+<link href="https://api.mapbox.com" rel="preconnect"/>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.26.0/mapbox-gl.css" rel="stylesheet"/>
+<style>
+:root{
+  --black:#050505;
+  --black-2:#080607;
+  --panel:#0c0809;
+  --panel-2:#13090c;
+  --red:#ff2845;
+  --red-dark:#941124;
+  --red-soft:#ff7583;
+  --white:#f6f1f2;
+  --muted:#9b8e91;
+  --line:rgba(255,255,255,.11);
+  --line-strong:rgba(255,255,255,.22);
+  --pad:clamp(22px,4.2vw,76px);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--black)}
+body{margin:0;background:var(--black);color:var(--white);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden}
+body.no-scroll{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit}
+button{border-radius:0}
+::selection{background:var(--red);color:#160106}
+
+.scroll-progress{position:fixed;z-index:500;left:0;right:0;top:0;height:2px;background:transparent}.scroll-progress span{display:block;width:0;height:100%;background:var(--red);box-shadow:0 0 14px rgba(255,40,69,.8)}
+.topbar{position:fixed;z-index:150;left:0;right:0;top:2px;height:72px;display:flex;align-items:center;justify-content:space-between;gap:28px;padding:0 24px;border-bottom:1px solid var(--line);background:rgba(5,5,5,.88);backdrop-filter:blur(16px)}
+.brand{display:grid;gap:5px;min-width:220px}.brand span,.eyebrow,.section-number,.data-truth,.tool-toolbar span,.order-head span,.selected-card small,.menu-heading span,.chart-card header span,.browser-head,.case-identity span,.scenario-controls span,.record header,.visibility-chart-card header,.formula-grid span,.bias-row,.capstone>span,.exhibition article>span,.project-footer,.live-status span{font-family:"Courier New",monospace;letter-spacing:.12em}.brand span{font-size:7px;color:var(--red)}.brand strong{font-size:13px;letter-spacing:-.02em}
+.topbar nav{display:flex;gap:20px;align-items:center}.topbar nav a{position:relative;color:#b9b0b2;font:700 8px "Courier New",monospace;letter-spacing:.08em}.topbar nav a::after{content:"";position:absolute;left:0;right:100%;bottom:-8px;height:1px;background:var(--red);transition:right .2s}.topbar nav a:hover,.topbar nav a.active{color:#fff}.topbar nav a:hover::after,.topbar nav a.active::after{right:0}
+.token-button{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);background:transparent;color:var(--white);cursor:pointer}.token-button i{width:7px;height:7px;border-radius:50%;background:var(--red-dark);box-shadow:0 0 10px rgba(255,40,69,.6)}.token-button.connected i{background:var(--red);animation:pulse 1.8s infinite}.token-button span{font:700 8px "Courier New",monospace;letter-spacing:.08em}
+@keyframes pulse{50%{opacity:.35;transform:scale(.82)}}
+
+.token-panel{position:fixed;z-index:200;top:84px;right:18px;width:min(410px,calc(100vw - 36px));padding:20px;border:1px solid var(--line-strong);background:rgba(8,6,7,.97);box-shadow:0 26px 80px rgba(0,0,0,.6);transform:translateY(-15px);opacity:0;pointer-events:none;transition:.25s}.token-panel.open{transform:none;opacity:1;pointer-events:auto}.token-panel-head{display:flex;justify-content:space-between;gap:20px}.token-panel-head div{display:grid;gap:7px}.token-panel-head span{color:var(--red);font:700 7px "Courier New",monospace;letter-spacing:.1em}.token-panel-head strong{font-size:19px}.token-panel-head button{width:32px;height:32px;border:1px solid var(--line);background:transparent;color:#fff;font-size:22px;cursor:pointer}.token-panel p{color:var(--muted);font-size:11px;line-height:1.5}.token-panel code{color:var(--red-soft)}.token-panel input{width:100%;padding:12px;border:1px solid var(--line);outline:0;background:#10090b;color:#fff;font:11px "Courier New",monospace}.token-panel input:focus{border-color:var(--red)}.token-actions{display:flex;gap:8px;margin-top:9px}.token-actions button{flex:1;padding:11px;border:1px solid var(--red);background:var(--red);color:#180106;font:700 8px "Courier New",monospace;letter-spacing:.08em;cursor:pointer}.token-actions button:last-child{background:transparent;color:var(--red)}.token-panel small{display:block;margin-top:11px;color:var(--muted);font-size:9px;line-height:1.4}.token-panel small.error{color:var(--red-soft)}
+
+main{display:block}.section{position:relative;min-height:100vh;padding:120px var(--pad) 90px;border-bottom:1px solid var(--line);overflow:hidden}.section::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.6),transparent 90%)}
+.eyebrow{margin:0;color:var(--red);font-size:8px;font-weight:700}.section-number{position:absolute;right:var(--pad);top:94px;color:rgba(255,255,255,.06);font-size:clamp(90px,14vw,210px);font-weight:900;line-height:1;letter-spacing:-.1em}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:none}.delay-1{transition-delay:.12s}.delay-2{transition-delay:.24s}
+
+.cover{position:relative;min-height:100vh;padding:110px var(--pad) 46px;overflow:hidden;background:radial-gradient(circle at 82% 22%,rgba(255,40,69,.13),transparent 30%),radial-gradient(circle at 18% 78%,rgba(148,17,36,.12),transparent 28%),var(--black)}.cover-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,40,69,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,40,69,.04) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,#000 40%,transparent 100%)}.cover-copy{position:relative;z-index:3;width:min(670px,55vw);padding-top:5vh}.cover h1{margin:22px 0 30px;font-size:clamp(78px,11vw,178px);line-height:.72;letter-spacing:-.095em;font-weight:900}.cover h1 em,.question h2 em,.argument h2 em{color:var(--red);font-style:normal}.cover-subtitle{max-width:540px;margin:0;color:#c0b7b9;font-size:clamp(16px,1.55vw,24px);line-height:1.38}.cover-diagram{position:absolute;z-index:2;right:1vw;top:11vh;width:min(54vw,790px);height:72vh}.cover-diagram svg{width:100%;height:100%}.street-line{fill:none;stroke:rgba(255,255,255,.14);stroke-width:2}.street-line.faint{stroke:rgba(255,255,255,.055);stroke-width:12}.route-line{fill:none;stroke:var(--red);stroke-width:4;stroke-dasharray:10 8;filter:url(#redGlow);animation:routeDash 8s linear infinite}@keyframes routeDash{to{stroke-dashoffset:-180}}.diagram-node circle{fill:var(--black);stroke:var(--red);stroke-width:3}.diagram-node text,.diagram-label{fill:#aaa0a2;font:700 10px "Courier New",monospace;letter-spacing:.1em;text-anchor:middle}.diagram-label{text-anchor:start}.diagram-label.red{fill:var(--red)}.ghost-number{fill:rgba(255,255,255,.025);font:900 190px Arial}.cover-footer{position:absolute;z-index:4;left:var(--pad);right:var(--pad);bottom:35px;display:flex;justify-content:space-between;gap:25px;color:var(--muted);font:700 8px "Courier New",monospace;letter-spacing:.1em}.cover-footer a{color:var(--red)}
+
+.question{display:grid;grid-template-columns:1.3fr .7fr;grid-template-rows:auto 1fr;gap:60px;background:radial-gradient(circle at 78% 36%,rgba(255,40,69,.08),transparent 28%),var(--black)}.question-copy{position:relative;z-index:2}.question h2{margin:26px 0 0;font-size:clamp(64px,9vw,142px);line-height:.82;letter-spacing:-.078em}.question-support{position:relative;z-index:2;align-self:end;padding-bottom:36px}.question-support>p{margin:0 0 30px;color:#c4bbbd;font-size:clamp(17px,1.55vw,24px);line-height:1.48}.keywords{display:flex;flex-wrap:wrap;gap:7px}.keywords span{padding:8px 10px;border:1px solid var(--line);color:var(--muted);font:700 7px "Courier New",monospace;letter-spacing:.08em}.question-axis{position:relative;z-index:2;grid-column:1/-1;display:grid;grid-template-columns:1fr 120px 1fr;gap:20px;align-items:center;padding:22px;border:1px solid var(--line);background:rgba(10,7,8,.72)}.question-axis div{display:grid;gap:8px}.question-axis div:last-child{text-align:right}.question-axis span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.question-axis strong{font-size:clamp(15px,1.8vw,27px)}.question-axis i{height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);box-shadow:0 0 12px rgba(255,40,69,.7)}
+
+.interface{background:var(--black-2)}.interface-head{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:25px}.interface-head h2{margin:14px 0 0;font-size:clamp(58px,8.2vw,128px);line-height:.82;letter-spacing:-.075em}.live-status{display:flex;align-items:center;gap:12px;padding:14px 17px;border:1px solid var(--line);background:#080607}.live-status i{width:10px;height:10px;border-radius:50%;background:var(--red-dark);box-shadow:0 0 13px rgba(255,40,69,.55)}.live-status.live i{background:var(--red);animation:pulse 1.8s infinite}.live-status div{display:grid;gap:5px}.live-status span{color:var(--muted);font-size:7px}.live-status strong{font:700 10px "Courier New",monospace}.data-truth{position:relative;z-index:2;display:grid;grid-template-columns:auto 1fr auto 1fr auto 1fr;gap:10px 16px;align-items:center;padding:13px 16px;border:1px solid var(--line);background:#0a0708;font-size:7px}.data-truth p{margin:0;color:var(--muted);font-family:Arial,Helvetica,sans-serif;font-size:10px;line-height:1.35;letter-spacing:0}.truth{padding:5px 7px;border:1px solid}.truth.real{border-color:var(--red);color:var(--red)}.truth.model{border-color:var(--red-dark);color:var(--red-soft)}.truth.input{border-color:#6f6467;color:#c6bdc0}
+.tool-shell{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,.62fr);min-height:760px;margin-top:12px;border:1px solid var(--line);background:#060506}.map-side{min-width:0;border-right:1px solid var(--line)}.tool-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) 155px 130px 86px;gap:7px;padding:10px;border-bottom:1px solid var(--line);background:#090607}.tool-toolbar label{display:grid;gap:6px;padding:9px 10px;border:1px solid var(--line);background:#0d090a}.tool-toolbar span{color:var(--red);font-size:7px}.tool-toolbar input,.tool-toolbar select{min-width:0;border:0;outline:0;background:transparent;color:#fff;font-size:11px}.tool-toolbar select option{background:#0a0708}.tool-toolbar>button{border:1px solid var(--red);background:transparent;color:var(--red);font:700 7px "Courier New",monospace;letter-spacing:.08em;cursor:pointer}.tool-toolbar>button:hover{background:var(--red);color:#170106}.map-shell{position:relative;height:698px;overflow:hidden;background:#050505}#map{position:absolute;inset:0}.map-placeholder{position:absolute;z-index:6;inset:0;display:grid;place-items:center;padding:30px;background:radial-gradient(circle at 50% 38%,rgba(255,40,69,.15),transparent 30%),linear-gradient(135deg,rgba(255,255,255,.018) 25%,transparent 25%) 0 0/30px 30px,#050505;transition:.3s}.map-placeholder.hidden{opacity:0;pointer-events:none}.map-placeholder>div{max-width:520px;text-align:center}.map-placeholder span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.map-placeholder h3{margin:17px 0 11px;font-size:clamp(35px,4vw,62px);line-height:.92;letter-spacing:-.055em}.map-placeholder p{color:var(--muted);line-height:1.5}.map-placeholder button{margin-top:10px;padding:11px 14px;border:1px solid var(--red);background:var(--red);color:#170106;font:700 8px "Courier New",monospace;letter-spacing:.08em;cursor:pointer}.map-legend{position:absolute;z-index:5;left:12px;bottom:38px;display:flex;gap:9px;padding:9px 10px;border:1px solid var(--line);background:rgba(5,5,5,.84);backdrop-filter:blur(8px)}.map-legend span{display:flex;align-items:center;gap:5px;color:#ccc3c5;font:700 7px "Courier New",monospace}.map-legend i{display:block;width:8px;height:8px;border-radius:50%}.grade-a{background:var(--red)}.grade-b{background:var(--red-dark)}.grade-c{background:var(--red-soft)}.map-legend .route-key{width:18px;height:2px;border-radius:0;background:var(--red);box-shadow:0 0 8px rgba(255,40,69,.8)}.map-instruction{position:absolute;z-index:5;right:12px;bottom:38px;padding:9px 11px;border-left:2px solid var(--red);background:rgba(5,5,5,.84);color:#d8d0d2;font:700 7px "Courier New",monospace;letter-spacing:.06em}.mapboxgl-ctrl-group{border:1px solid rgba(255,40,69,.24)!important;background:rgba(8,6,7,.92)!important;box-shadow:none!important}.mapboxgl-ctrl-group button{filter:invert(1) grayscale(1)}.mapboxgl-ctrl-attrib{background:rgba(5,5,5,.78)!important;color:#8e8587!important}.mapboxgl-ctrl-attrib a{color:#c8c0c2!important}.mapboxgl-popup-content{min-width:235px;padding:16px!important;border:1px solid rgba(255,40,69,.4);border-radius:0!important;background:#0b0708!important;color:#fff;box-shadow:0 18px 60px rgba(0,0,0,.6)!important}.mapboxgl-popup-tip{border-top-color:#0b0708!important;border-bottom-color:#0b0708!important}.map-popup span{color:var(--red);font:700 7px "Courier New",monospace}.map-popup h4{margin:10px 0 7px;font-size:18px}.map-popup p{margin:0;color:var(--muted);font-size:10px;line-height:1.4}
+.order-side{display:flex;flex-direction:column;min-width:0;background:var(--panel)}.order-head{display:flex;justify-content:space-between;gap:16px;padding:16px;border-bottom:1px solid var(--line)}.order-head span{color:var(--red);font-size:7px}.order-head strong{font:700 8px "Courier New",monospace}.selected-card{min-height:145px;padding:20px 16px;border-bottom:1px solid var(--line)}.selected-card small{color:var(--red);font-size:7px}.selected-card h3{margin:12px 0 8px;font-size:27px;line-height:.98;letter-spacing:-.05em}.selected-card p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}.route-controls{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}.route-controls button{padding:12px 8px;border:0;border-right:1px solid var(--line);background:transparent;color:#c9c0c2;font:700 7px "Courier New",monospace;cursor:pointer}.route-controls button:last-child{border-right:0}.route-controls button:hover:not(:disabled){color:var(--red);background:rgba(255,40,69,.045)}.route-controls button:disabled{opacity:.3;cursor:not-allowed}.route-metrics{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}.route-metrics div{padding:13px 10px;border-right:1px solid var(--line)}.route-metrics div:last-child{border-right:0}.route-metrics span{display:block;color:var(--muted);font:700 7px "Courier New",monospace}.route-metrics b{display:block;margin-top:7px;color:var(--red-soft);font:700 12px "Courier New",monospace}.route-metrics small{display:block;margin-top:5px;color:#62595b;font:700 6px "Courier New",monospace}.menu-heading{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px}.menu-heading div{display:flex;gap:10px;align-items:center}.menu-heading span{color:var(--red);font-size:7px}.menu-heading small{color:var(--muted);font-size:8px}.menu-heading>b{display:grid;place-items:center;min-width:23px;height:23px;padding:0 5px;background:var(--red);color:#160105;font:700 9px "Courier New",monospace}.menu-list{max-height:260px;overflow:auto;padding:0 16px}.empty-state{min-height:130px;display:grid;place-items:center;color:var(--muted);font-size:10px;text-align:center;line-height:1.45}.menu-item{display:grid;grid-template-columns:1fr auto auto;gap:11px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.menu-item h4{margin:0 0 4px;font-size:13px}.menu-item p{margin:0;color:var(--muted);font-size:8px}.menu-item>span{font:700 9px "Courier New",monospace}.menu-item button{width:29px;height:29px;border:1px solid var(--red);background:transparent;color:var(--red);cursor:pointer}.menu-item button:hover{background:var(--red);color:#180106}.cart-box{margin-top:auto;padding:13px 16px 16px;border-top:1px solid var(--line);background:#090607}.cart-items{max-height:104px;overflow:auto}.cart-items>p{margin:5px 0;color:var(--muted);font-size:9px}.cart-line{display:flex;justify-content:space-between;gap:15px;padding:7px 0;border-bottom:1px solid var(--line);font-size:9px}.cart-line b{font-family:"Courier New",monospace}.tip-control{display:grid;gap:7px;padding:11px 0}.tip-control>span{display:flex;justify-content:space-between;color:var(--muted);font:700 7px "Courier New",monospace}.tip-control input,.scenario-controls input{width:100%;accent-color:var(--red)}.cart-total{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-top:1px solid var(--line)}.cart-total span{color:var(--muted);font:700 7px "Courier New",monospace}.cart-total b{color:var(--red);font:700 15px "Courier New",monospace}.cart-box>button{width:100%;padding:12px;border:1px solid var(--red);background:var(--red);color:#170106;font:700 8px "Courier New",monospace;letter-spacing:.06em;cursor:pointer}.cart-box>button:disabled{border-color:var(--line);background:#151012;color:#5f5558;cursor:not-allowed}
+.d3-head{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin:95px 0 18px}.d3-head h3{margin:13px 0 0;font-size:clamp(38px,5.5vw,82px);line-height:.87;letter-spacing:-.065em}.d3-head label{display:flex;align-items:center;gap:8px;color:var(--muted);font:700 7px "Courier New",monospace}.d3-head input{accent-color:var(--red)}.charts{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .75fr;border:1px solid var(--line)}.chart-card{min-width:0;padding:18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#080607}.chart-card:nth-child(2){border-right:0}.chart-card.wide{grid-column:1/-1;border-right:0;border-bottom:0}.chart-card header{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;margin-bottom:8px}.chart-card header span{color:var(--red);font-size:7px}.chart-card h4{margin:7px 0 0;font-size:21px}.chart-card header small{color:var(--muted);font:700 7px "Courier New",monospace}.chart{min-height:280px}.chart svg{display:block;width:100%;height:auto;overflow:visible}.axis text,.grid text{fill:#8f8386;font:9px "Courier New",monospace}.axis path,.axis line{stroke:rgba(255,255,255,.14)}.grid line{stroke:rgba(255,255,255,.07)}.d3-bar{fill:var(--red-dark);cursor:pointer;transition:fill .2s}.d3-bar:hover,.d3-bar.selected{fill:var(--red)}.bar-value{fill:#d3cacc;font:9px "Courier New",monospace}.grade-arc{cursor:pointer;stroke:#080607;stroke-width:3;opacity:.72}.grade-arc:hover,.grade-arc.selected{opacity:1;filter:drop-shadow(0 0 8px rgba(255,40,69,.6))}.donut-total{fill:#fff;font-size:33px;font-weight:900}.donut-label,.legend-text{fill:#928689;font:8px "Courier New",monospace}.hist-bar{fill:var(--red-dark);stroke:rgba(255,40,69,.42)}.brush .selection{fill:rgba(255,40,69,.24);stroke:var(--red)}.brush .handle{fill:var(--red)}.score-label{width:max-content;margin-left:auto;padding:7px 9px;border:1px solid rgba(255,40,69,.38);color:var(--red);font:700 7px "Courier New",monospace}.chart-empty{min-height:260px;display:grid;place-items:center;color:var(--muted);font-size:10px}.restaurant-browser{position:relative;z-index:2;margin-top:18px;border:1px solid var(--line);background:#080607}.browser-head{display:flex;justify-content:space-between;gap:25px;padding:13px 15px;border-bottom:1px solid var(--line);color:var(--red);font-size:7px}.browser-head small{color:var(--muted)}.restaurant-strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,280px);gap:0;overflow-x:auto}.restaurant-record{min-height:190px;display:flex;flex-direction:column;padding:16px;border-right:1px solid var(--line);background:linear-gradient(145deg,rgba(255,40,69,.04),transparent 50%);cursor:pointer;transition:.2s}.restaurant-record:hover{background:rgba(255,40,69,.075)}.restaurant-record span{color:var(--red);font:700 7px "Courier New",monospace}.restaurant-record h4{margin:15px 0 8px;font-size:19px;line-height:1;letter-spacing:-.035em}.restaurant-record p{margin:0;color:var(--muted);font-size:9px;line-height:1.45}.restaurant-record footer{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:auto;padding-top:16px}.restaurant-record footer b{display:grid;place-items:center;width:31px;height:31px;background:#fff;color:#130106}.restaurant-record footer small{font:700 7px "Courier New",monospace}.loading-records{min-width:100%;min-height:170px;display:grid;place-items:center;color:var(--muted);font-size:10px}
+
+.case{background:radial-gradient(circle at 86% 20%,rgba(255,40,69,.1),transparent 27%),var(--black)}.case-head{position:relative;z-index:2;display:grid;grid-template-columns:1.2fr .55fr;gap:70px;align-items:end}.case-head h2{margin:18px 0 0;font-size:clamp(58px,8vw,126px);line-height:.82;letter-spacing:-.075em}.case-identity{padding:19px;border:1px solid var(--line);border-left:2px solid var(--red);background:rgba(10,7,8,.75)}.case-identity span{color:var(--red);font-size:7px}.case-identity strong{display:block;margin:12px 0 7px;font-size:21px;line-height:1}.case-identity p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}.scenario-controls{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr) .8fr;gap:20px;margin-top:45px;padding:19px;border:1px solid var(--line);background:#090607}.scenario-controls label{display:grid;gap:12px}.scenario-controls span{display:flex;justify-content:space-between;color:var(--muted);font-size:7px}.scenario-controls span b{color:var(--red)}.scenario-controls p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}.reality-grid{position:relative;z-index:2;display:grid;grid-template-columns:.72fr .72fr 1.25fr;border:1px solid var(--line);margin-top:16px}.record,.visibility-chart-card{min-width:0;background:#080607;border-right:1px solid var(--line)}.visibility-chart-card{border-right:0}.record header,.visibility-chart-card header{display:flex;justify-content:space-between;gap:15px;padding:14px;border-bottom:1px solid var(--line);color:var(--red);font-size:7px}.record header small,.visibility-chart-card header small{color:var(--muted)}.record-primary{padding:25px 15px;border-bottom:1px solid var(--line)}.record-primary strong{display:block;font-size:clamp(46px,6vw,88px);line-height:.85;letter-spacing:-.065em}.record-primary span{display:block;margin-top:11px;color:var(--muted);font:700 7px "Courier New",monospace}.record-row{display:flex;justify-content:space-between;gap:15px;padding:13px 15px;border-bottom:1px solid var(--line)}.record-row span{color:var(--muted);font:700 7px "Courier New",monospace}.record-row b{font:700 9px "Courier New",monospace}.worker-record .record-primary strong,.worker-record .record-row b{color:var(--red-soft)}#visibilityChart{min-height:420px;padding:18px}.visibility-label{fill:#b9afb2;font:8px "Courier New",monospace}.visibility-value{fill:#fff;font:700 9px "Courier New",monospace}.visibility-axis{fill:#776d70;font:7px "Courier New",monospace}.case-equation{position:relative;z-index:2;display:grid;grid-template-columns:140px 1fr;gap:25px;align-items:center;margin-top:18px;padding:22px;border-left:3px solid var(--red);background:rgba(255,40,69,.055)}.case-equation span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.case-equation strong{font-size:clamp(17px,2vw,30px);line-height:1.2}
+
+.methods{background:var(--black-2)}.methods-title{position:relative;z-index:2}.methods-title h2,.bias-head h2{margin:20px 0 0;font-size:clamp(58px,8.4vw,132px);line-height:.82;letter-spacing:-.075em}.pipeline{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);margin-top:70px;border:1px solid var(--line)}.pipeline article{min-height:290px;padding:20px;border-right:1px solid var(--line);background:linear-gradient(150deg,rgba(255,40,69,.055),transparent 50%)}.pipeline article:last-child{border-right:0}.pipeline article>span{color:var(--red);font:700 8px "Courier New",monospace}.pipeline h3{margin:50px 0 14px;font-size:38px;letter-spacing:-.05em}.pipeline p{color:#b9afb1;font-size:12px;line-height:1.5}.pipeline small{display:block;margin-top:28px;color:var(--red-soft);font:700 7px "Courier New",monospace}.formula-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;margin-top:18px;border:1px solid var(--line)}.formula-grid>div{padding:18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.formula-grid>div:nth-child(2n){border-right:0}.formula-grid>div:nth-last-child(-n+2){border-bottom:0}.formula-grid span{display:block;margin-bottom:9px;color:var(--red);font-size:7px}.formula-grid code{color:#d8ced1;font-size:12px;white-space:normal}
+
+.bias{background:radial-gradient(circle at 15% 20%,rgba(148,17,36,.12),transparent 28%),var(--black)}.bias-head{position:relative;z-index:2;display:grid;grid-template-columns:1.2fr .6fr;gap:80px;align-items:end}.bias-head>p{margin:0;color:#c4babc;font-size:18px;line-height:1.5}.bias-table{position:relative;z-index:2;margin-top:70px;border:1px solid var(--line)}.bias-row{display:grid;grid-template-columns:.5fr 1fr 1fr;border-bottom:1px solid var(--line);font-size:8px}.bias-row:last-child{border-bottom:0}.bias-row>*{margin:0;padding:18px;border-right:1px solid var(--line)}.bias-row>*:last-child{border-right:0}.bias-row strong{color:var(--red);font-family:Arial,Helvetica,sans-serif;font-size:15px;letter-spacing:0}.bias-row p{color:#b7adaf;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;letter-spacing:0}.bias-header{background:var(--red);color:#150105;font-weight:900}.bias-header span{border-color:rgba(0,0,0,.2)}
+
+.argument{padding-bottom:0;background:radial-gradient(circle at 20% 25%,rgba(255,40,69,.13),transparent 30%),var(--black)}.argument-copy{position:relative;z-index:2;max-width:1100px}.argument h2{margin:22px 0;font-size:clamp(78px,12vw,190px);line-height:.72;letter-spacing:-.09em}.argument-copy>p:last-child{max-width:750px;color:#c5bbbd;font-size:clamp(20px,2.25vw,35px);line-height:1.35}.capstone{position:relative;z-index:2;display:grid;grid-template-columns:.55fr 1fr;gap:28px;margin:100px 0 25px;padding:28px;border:1px solid var(--line);background:#090607}.capstone>span{color:var(--red);font-size:8px}.capstone h3{grid-column:2;margin:0;font-size:clamp(45px,6vw,90px);line-height:.82;letter-spacing:-.07em}.capstone>p{grid-column:2;margin:12px 0 25px;max-width:800px;color:#bdb3b5;font-size:16px;line-height:1.5}.capstone-components{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}.capstone-components div{display:grid;gap:24px;padding:17px;border-right:1px solid var(--line)}.capstone-components div:last-child{border-right:0}.capstone-components b{color:var(--red);font:700 8px "Courier New",monospace}.capstone-components span{font-size:12px;font-weight:800}.exhibition{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}.exhibition article{min-height:330px;padding:22px;border-right:1px solid var(--line);background:linear-gradient(145deg,rgba(255,40,69,.055),transparent 55%)}.exhibition article:last-child{border-right:0}.exhibition article>span{color:var(--red);font-size:7px}.exhibition h3{margin:75px 0 18px;font-size:clamp(28px,3vw,47px);line-height:.9;letter-spacing:-.055em}.exhibition p{color:var(--muted);font-size:12px;line-height:1.5}.project-footer{position:relative;z-index:2;display:flex;justify-content:space-between;gap:20px;margin:80px calc(var(--pad)*-1) 0;padding:26px var(--pad);border-top:1px solid var(--line);color:var(--muted);font-size:7px}.project-footer a{color:var(--red)}
+
+.confirmation{position:fixed;z-index:400;inset:0;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.84);backdrop-filter:blur(13px)}.confirmation[hidden]{display:none}.confirmation-card{width:min(590px,94vw);padding:45px;border:1px solid var(--red);background:radial-gradient(circle at 50% 0,rgba(255,40,69,.2),transparent 38%),#080607;text-align:center}.confirmation-card span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.confirmation-card h2{margin:18px 0 12px;font-size:clamp(40px,6vw,78px);letter-spacing:-.06em}.confirmation-card p{color:var(--muted);line-height:1.5}.confirmation-card button{margin-top:20px;padding:12px 15px;border:1px solid var(--red);background:var(--red);color:#180106;font:700 8px "Courier New",monospace;cursor:pointer}
+
+@media(max-width:1150px){.topbar nav{display:none}.cover-copy{width:65vw}.cover-diagram{right:-10vw;width:67vw;opacity:.8}.data-truth{grid-template-columns:auto 1fr}.tool-shell{grid-template-columns:1fr}.map-side{border-right:0;border-bottom:1px solid var(--line)}.order-side{min-height:680px}.case-head,.bias-head{grid-template-columns:1fr}.scenario-controls{grid-template-columns:repeat(3,1fr)}.scenario-controls p{grid-column:1/-1}.reality-grid{grid-template-columns:1fr 1fr}.visibility-chart-card{grid-column:1/-1;border-top:1px solid var(--line)}.worker-record{border-right:0}.pipeline{grid-template-columns:1fr 1fr}.pipeline article:nth-child(2){border-right:0}.pipeline article:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:760px){:root{--pad:19px}.topbar{height:64px;padding:0 14px}.brand{min-width:0}.brand span{display:none}.token-button span{display:none}.token-panel{top:74px}.cover{padding-top:100px}.cover-copy{width:100%;padding-top:4vh}.cover h1{font-size:24vw}.cover-subtitle{max-width:85%}.cover-diagram{right:-34vw;top:30vh;width:105vw;opacity:.38}.cover-footer{align-items:flex-start;flex-direction:column}.section{padding-top:95px}.question{grid-template-columns:1fr;gap:35px}.question h2{font-size:15.3vw}.question-axis{grid-template-columns:1fr}.question-axis i{height:40px;width:1px;margin:auto}.question-axis div:last-child{text-align:left}.interface-head{align-items:flex-start;flex-direction:column}.data-truth{grid-template-columns:auto 1fr}.tool-toolbar{grid-template-columns:1fr 1fr}.search-control{grid-column:1/-1}.map-shell{height:570px}.map-instruction{left:12px;right:auto;bottom:78px}.charts{grid-template-columns:1fr}.chart-card,.chart-card:nth-child(2){border-right:0}.chart-card.wide{grid-column:auto}.d3-head{align-items:flex-start;flex-direction:column}.case-head h2,.methods-title h2,.bias-head h2{font-size:14vw}.scenario-controls{grid-template-columns:1fr}.scenario-controls p{grid-column:auto}.reality-grid{grid-template-columns:1fr}.record,.worker-record{border-right:0;border-bottom:1px solid var(--line)}.visibility-chart-card{grid-column:auto;border-top:0}.case-equation{grid-template-columns:1fr}.pipeline{grid-template-columns:1fr}.pipeline article,.pipeline article:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.formula-grid{grid-template-columns:1fr}.formula-grid>div,.formula-grid>div:nth-child(2n),.formula-grid>div:nth-last-child(-n+2){border-right:0;border-bottom:1px solid var(--line)}.formula-grid>div:last-child{border-bottom:0}.bias-row{grid-template-columns:1fr}.bias-row>*{border-right:0;border-bottom:1px solid var(--line)}.bias-row>*:last-child{border-bottom:0}.bias-header{display:none}.capstone{grid-template-columns:1fr}.capstone h3,.capstone>p{grid-column:auto}.capstone-components{grid-template-columns:1fr 1fr}.capstone-components div:nth-child(2){border-right:0}.capstone-components div:nth-child(-n+2){border-bottom:1px solid var(--line)}.exhibition{grid-template-columns:1fr}.exhibition article{min-height:250px;border-right:0;border-bottom:1px solid var(--line)}.exhibition article:last-child{border-bottom:0}.exhibition h3{margin-top:45px}.project-footer{align-items:flex-start;flex-direction:column}}
+
+
+/* =====================================================
+   FINAL ASSIGNMENT STRUCTURE
+===================================================== */
+.assignment-topbar{gap:16px}.assignment-nav{min-width:0;max-width:calc(100vw - 430px);overflow-x:auto;scrollbar-width:none;padding:14px 0}.assignment-nav::-webkit-scrollbar{display:none}.assignment-nav a{flex:0 0 auto}
+.section-intro{position:relative;z-index:2;max-width:930px}.section-intro h2{margin:18px 0 22px;font-size:clamp(58px,8.5vw,138px);line-height:.82;letter-spacing:-.076em}.section-intro>p:last-child{max-width:720px;margin:0;color:#c2b9bb;font-size:clamp(16px,1.45vw,22px);line-height:1.45}
+.question-mini-grid{display:grid;grid-template-columns:1fr;gap:8px}.question-mini-grid div{display:flex;justify-content:space-between;gap:20px;padding:13px;border-bottom:1px solid var(--line)}.question-mini-grid span{color:var(--red);font:700 7px "Courier New",monospace;letter-spacing:.1em}.question-mini-grid b{font-size:13px}
+
+.keywords-section{background:radial-gradient(circle at 75% 20%,rgba(255,40,69,.09),transparent 30%),var(--black)}.keyword-stage{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,1fr);margin-top:65px;border:1px solid var(--line)}.keyword-stage article{min-height:430px;padding:24px 20px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(255,40,69,.03),transparent 55%);transition:.25s}.keyword-stage article:last-child{border-right:0}.keyword-stage article:hover{background:rgba(255,40,69,.08);transform:translateY(-7px)}.keyword-stage b{color:var(--red);font:700 9px "Courier New",monospace}.keyword-stage h3{margin:0;font-size:clamp(22px,2.3vw,38px);line-height:.93;letter-spacing:-.05em;writing-mode:vertical-rl;transform:rotate(180deg)}
+
+.fields-section{background:var(--black-2)}.field-orbit{position:relative;z-index:2;min-height:570px;margin-top:40px}.field-orbit svg,.practice-map svg,.situated-system svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.field-orbit svg path,.practice-map svg path,.situated-system svg path,.situated-system svg circle{fill:none;stroke:rgba(255,40,69,.27);stroke-width:1;stroke-dasharray:7 8}.field-core,.practice-center,.worker-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;text-align:center;border:1px solid var(--red);background:radial-gradient(circle,rgba(255,40,69,.13),rgba(8,6,7,.96) 68%);box-shadow:0 0 70px rgba(255,40,69,.12)}.field-core{width:250px;height:250px;border-radius:50%}.field-core span,.practice-center span,.worker-core small{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.field-core strong,.practice-center strong,.worker-core strong{font-size:18px;line-height:1.08}.field-node{position:absolute;width:190px;padding:16px;border:1px solid var(--line);background:#0c0809;text-align:center;font:700 15px/1.05 Arial}.field-node.f1{left:4%;top:5%}.field-node.f2{right:4%;top:5%}.field-node.f3{left:0;bottom:8%}.field-node.f4{right:0;bottom:8%}.field-node.f5{left:50%;bottom:-2%;transform:translateX(-50%)}
+
+.lineage-section{background:radial-gradient(circle at 15% 70%,rgba(148,17,36,.11),transparent 25%),var(--black)}.lineage-track{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,1fr);margin-top:60px;border-top:1px solid var(--red)}.lineage-track article{position:relative;min-height:315px;padding:34px 22px 22px;border-right:1px solid var(--line)}.lineage-track article:last-child{border-right:0}.lineage-track article::before{content:"";position:absolute;top:-6px;left:22px;width:11px;height:11px;border-radius:50%;background:var(--black);border:2px solid var(--red);box-shadow:0 0 13px rgba(255,40,69,.8)}.lineage-track time{color:var(--red);font:700 9px "Courier New",monospace}.lineage-track h3{margin:50px 0 17px;font-size:24px;line-height:.95}.lineage-track p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.precedent-fork{position:relative;z-index:2;display:grid;grid-template-columns:290px 1fr;gap:24px;margin-top:20px;padding:20px;border-left:2px solid var(--red);background:rgba(255,40,69,.05)}.precedent-fork span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.precedent-fork strong{font-size:16px}
+
+.practice-section{background:var(--black-2)}.practice-map{position:relative;z-index:2;min-height:680px;margin-top:30px}.practice-center{width:280px;height:280px;border-radius:50%}.practice-map article{position:absolute;width:210px;padding:17px;border:1px solid var(--line);background:#0b0708}.practice-map article h3{margin:0 0 8px;font-size:14px}.practice-map article p{margin:0;color:var(--red);font:700 8px "Courier New",monospace}.practice-map .p1{left:3%;top:5%}.practice-map .p2{left:39%;top:0}.practice-map .p3{right:3%;top:5%}.practice-map .p4{left:1%;bottom:8%}.practice-map .p5{left:39%;bottom:0}.practice-map .p6{right:1%;bottom:8%}.audience-strip,.method-formats,.submission-strip{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:15px;border:1px solid var(--line);background:#090607}.audience-strip span,.method-formats span,.submission-strip span{margin-right:auto;color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.audience-strip b,.method-formats b,.submission-strip b{padding:8px 10px;border:1px solid var(--line);font:700 8px "Courier New",monospace}
+
+.situated-section{background:radial-gradient(circle at 50% 48%,rgba(255,40,69,.09),transparent 35%),var(--black)}.situated-system{position:relative;z-index:2;min-height:640px;margin-top:25px}.worker-core{width:230px;height:230px;border-radius:50%}.worker-core strong{font-size:27px}.s-node{position:absolute;width:155px;height:95px;display:grid;place-content:center;text-align:center;border:1px solid var(--line);background:#0a0708}.s-node span{color:var(--white);font-size:14px;font-weight:800}.s-node b{margin-top:5px;color:var(--red);font:700 8px "Courier New",monospace}.sn1{left:50%;top:0;transform:translateX(-50%)}.sn2{right:5%;top:13%}.sn3{right:2%;bottom:13%}.sn4{left:50%;bottom:0;transform:translateX(-50%)}.sn5{left:2%;bottom:13%}.sn6{left:5%;top:13%}
+
+.methods-expanded{background:var(--black-2)}.method-quadrants{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);margin:48px 0 14px;border:1px solid var(--line)}.method-quadrants article{min-height:255px;padding:22px;border-right:1px solid var(--line)}.method-quadrants article:last-child{border-right:0}.method-quadrants span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.method-quadrants h3{margin:56px 0 13px;font-size:25px}.method-quadrants p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.method-formats{margin-top:14px}
+
+.visual-section{background:var(--black-2)}.visual-language{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr 1fr;gap:12px;margin-top:45px}.visual-language article{min-height:340px;padding:23px;border:1px solid var(--line);background:#090607}.visual-language article>span{color:var(--red);font:700 8px "Courier New",monospace;letter-spacing:.1em}.visual-language h3{margin:55px 0 0;font-size:25px;line-height:1}.swatches{display:grid;grid-template-columns:repeat(4,1fr);height:150px;margin-top:25px}.swatches i:nth-child(1){background:#050505}.swatches i:nth-child(2){background:#941124}.swatches i:nth-child(3){background:#ff2845}.swatches i:nth-child(4){background:#f6f1f2}.trace-card svg{width:100%;height:190px;margin-top:18px}.trace-card path{fill:none;stroke:var(--red);stroke-width:5;stroke-dasharray:12 8}.trace-card circle{fill:var(--black);stroke:var(--red);stroke-width:3}.layer-card>div{display:grid;margin-top:25px}.layer-card b{padding:13px;border:1px solid var(--line);border-bottom:0}.layer-card b:last-child{border-bottom:1px solid var(--line);color:var(--red)}.type-card{display:flex;flex-direction:column;justify-content:space-between}.type-card strong{font-size:clamp(45px,6vw,90px);line-height:.79;letter-spacing:-.08em}
+
+.argument-only{display:grid;grid-template-columns:1.1fr .9fr;gap:70px;align-items:center}.argument-ladder{position:relative;z-index:2;display:grid;border:1px solid var(--line)}.argument-ladder div{display:grid;grid-template-columns:90px 1fr;gap:20px;align-items:center;padding:22px;border-bottom:1px solid var(--line)}.argument-ladder div:last-child{border-bottom:0}.argument-ladder span{color:var(--red);font:700 9px "Courier New",monospace}.argument-ladder b{font-size:18px}
+
+.capstone-section{background:radial-gradient(circle at 50% 30%,rgba(255,40,69,.09),transparent 35%),var(--black)}.capstone-map{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:50px}.capstone-center{grid-column:1/-1;padding:28px;border:1px solid var(--red);background:rgba(255,40,69,.055)}.capstone-center span{color:var(--red);font:700 8px "Courier New",monospace}.capstone-center strong{display:block;margin-top:12px;font-size:clamp(28px,4vw,60px);line-height:.9}.capstone-map article{min-height:180px;padding:22px;border:1px solid var(--line)}.capstone-map article b{color:var(--red);font:700 9px "Courier New",monospace}.capstone-map article h3{margin:65px 0 0;font-size:24px}.capstone-caution{position:relative;z-index:2;margin:18px 0 0;color:var(--muted);font-size:13px}
+
+.challenge-section{background:var(--black-2)}.challenge-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);margin-top:48px;border:1px solid var(--line)}.challenge-grid article{min-height:330px;padding:22px;border-right:1px solid var(--line)}.challenge-grid article:last-child{border-right:0}.challenge-grid span{color:var(--red);font:700 8px "Courier New",monospace}.challenge-grid h3{margin:75px 0 15px;font-size:24px}.challenge-grid p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.forward-plan{position:relative;z-index:2;display:grid;grid-template-columns:180px repeat(3,1fr);margin-top:14px;border:1px solid var(--line)}.forward-plan>span,.forward-plan>div{padding:18px;border-right:1px solid var(--line)}.forward-plan>div:last-child{border-right:0}.forward-plan>span{color:var(--red);font:700 8px "Courier New",monospace}.forward-plan b{color:var(--red);font:700 8px "Courier New",monospace}.forward-plan p{margin:8px 0 0;color:#c3babc;font-size:12px}
+
+.exhibition-section{background:var(--black)}.exhibition-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);margin-top:45px;border:1px solid var(--line)}.exhibition-grid article{min-height:620px;padding:22px;border-right:1px solid var(--line)}.exhibition-grid article:last-child{border-right:0}.exhibition-grid article>span{color:var(--red);font:700 8px "Courier New",monospace}.exhibition-grid h3{margin:24px 0;font-size:31px;line-height:.9}.exhibition-grid p{color:var(--muted);font-size:12px;line-height:1.5}.drawing-preview{position:relative;height:330px;margin:26px auto 18px;border:1px solid var(--line);background:linear-gradient(180deg,#10090b,#050505);overflow:hidden}.drawing-preview i{position:absolute;left:15%;right:15%;height:2px;background:var(--red);box-shadow:0 0 13px rgba(255,40,69,.55)}.drawing-preview i:nth-child(1){top:18%;transform:rotate(-8deg)}.drawing-preview i:nth-child(2){top:38%;transform:rotate(6deg)}.drawing-preview i:nth-child(3){top:58%;transform:rotate(-5deg)}.drawing-preview i:nth-child(4){top:78%;transform:rotate(9deg)}.drawing-preview b{position:absolute;left:20px;bottom:20px;font:900 42px/0.82 Arial;color:rgba(255,255,255,.12)}.receipt-preview{width:72%;min-height:360px;margin:26px auto 18px;padding:20px;background:#f3eeee;color:#170207;transform:rotate(2deg);box-shadow:0 25px 55px rgba(0,0,0,.45);font-family:"Courier New",monospace}.receipt-preview b,.receipt-preview em,.receipt-preview small{display:block}.receipt-preview em{margin:15px 0 28px;font-size:42px;font-weight:900;font-style:normal}.receipt-preview small{padding:10px 0;border-bottom:1px dashed #5d5053}.screen-preview{position:relative;height:300px;margin:26px 0 18px;border:12px solid #171214;background:radial-gradient(circle at 70% 30%,rgba(255,40,69,.2),transparent 35%),#050505;display:grid;place-content:center;text-align:center}.screen-preview::after{content:"";position:absolute;left:44%;right:44%;bottom:-50px;height:42px;background:#171214}.screen-preview i{position:absolute;left:10%;right:10%;top:65%;height:3px;background:var(--red);transform:rotate(-7deg);box-shadow:0 0 16px rgba(255,40,69,.8)}.screen-preview strong{font-size:28px}.screen-preview small{margin-top:8px;color:var(--red);font:700 8px "Courier New",monospace}.submission-strip{margin-top:16px}
+
+@media(max-width:1180px){.assignment-nav{max-width:calc(100vw - 360px)}.keyword-stage{grid-template-columns:repeat(3,1fr)}.keyword-stage article:nth-child(3){border-right:0}.keyword-stage article:nth-child(-n+3){border-bottom:1px solid var(--line)}.keyword-stage article:nth-child(5){border-right:0}.lineage-track{grid-template-columns:1fr 1fr}.lineage-track article{border-bottom:1px solid var(--line)}.lineage-track article:nth-child(2n){border-right:0}.lineage-track article:last-child{grid-column:1/-1}.method-quadrants,.challenge-grid{grid-template-columns:1fr 1fr}.method-quadrants article:nth-child(2),.challenge-grid article:nth-child(2){border-right:0}.method-quadrants article:nth-child(-n+2),.challenge-grid article:nth-child(-n+2){border-bottom:1px solid var(--line)}.exhibition-grid{grid-template-columns:1fr}.exhibition-grid article{border-right:0;border-bottom:1px solid var(--line)}.exhibition-grid article:last-child{border-bottom:0}}
+@media(max-width:900px){.assignment-nav{display:none}.field-node{width:155px}.practice-map article{width:175px}.argument-only{grid-template-columns:1fr}.forward-plan{grid-template-columns:1fr}.forward-plan>span,.forward-plan>div{border-right:0;border-bottom:1px solid var(--line)}.forward-plan>div:last-child{border-bottom:0}}
+@media(max-width:760px){.keyword-stage,.method-quadrants,.challenge-grid,.visual-language,.capstone-map{grid-template-columns:1fr}.keyword-stage article,.keyword-stage article:nth-child(3),.keyword-stage article:nth-child(5),.method-quadrants article,.challenge-grid article{min-height:180px;border-right:0;border-bottom:1px solid var(--line)}.keyword-stage article:last-child,.method-quadrants article:last-child,.challenge-grid article:last-child{border-bottom:0}.keyword-stage h3{writing-mode:horizontal-tb;transform:none}.field-orbit,.practice-map,.situated-system{min-height:auto;display:grid;grid-template-columns:1fr;gap:10px;margin-top:30px}.field-orbit svg,.practice-map svg,.situated-system svg{display:none}.field-core,.field-node,.practice-center,.practice-map article,.worker-core,.s-node{position:static;width:100%;height:auto;transform:none;border-radius:0;padding:24px}.practice-center,.worker-core{min-height:180px}.lineage-track{grid-template-columns:1fr}.lineage-track article,.lineage-track article:nth-child(2n),.lineage-track article:last-child{grid-column:auto;border-right:0}.precedent-fork{grid-template-columns:1fr}.audience-strip,.method-formats,.submission-strip{align-items:flex-start;flex-direction:column}.argument-ladder div{grid-template-columns:1fr}.capstone-center{grid-column:auto}.exhibition-grid article{min-height:auto}.receipt-preview{width:88%}}
+
+/* =====================================================
+   FONT READABILITY PASS — REVIEW / PROJECTION
+===================================================== */
+
+/* Header and global microtype */
+.brand span{font-size:9px}
+.brand strong{font-size:15px}
+.topbar nav a{font-size:10px;letter-spacing:.065em}
+.token-button span{font-size:10px}
+.eyebrow{font-size:10px;letter-spacing:.11em}
+.cover-footer{font-size:10px}
+.diagram-node text,.diagram-label{font-size:11px}
+
+/* Token panel */
+.token-panel-head span{font-size:9px}
+.token-panel-head strong{font-size:21px}
+.token-panel p{font-size:14px;line-height:1.55}
+.token-panel input{font-size:13px}
+.token-actions button{font-size:10px}
+.token-panel small{font-size:11px;line-height:1.5}
+
+/* Questions and labels */
+.keywords span{font-size:10px;padding:9px 12px}
+.question-mini-grid span{font-size:10px}
+.question-mini-grid b{font-size:15px}
+.question-axis span{font-size:10px}
+
+/* Live data disclosure and controls */
+.live-status span{font-size:9px}
+.live-status strong{font-size:12px}
+.data-truth{font-size:9px}
+.data-truth p{font-size:12px;line-height:1.5}
+.tool-toolbar span{font-size:9px}
+.tool-toolbar input,.tool-toolbar select{font-size:13px}
+.tool-toolbar>button{font-size:10px}
+.map-placeholder span{font-size:10px}
+.map-placeholder p{font-size:14px;line-height:1.55}
+.map-placeholder button{font-size:10px}
+.map-legend span{font-size:9px}
+.map-instruction{font-size:9px;line-height:1.45}
+
+/* Ordering panel */
+.order-head span,.selected-card small,.menu-heading span{font-size:9px}
+.selected-card p,.menu-item p,.cart-item p{font-size:12px;line-height:1.5}
+.menu-item h4,.cart-item h4{font-size:15px}
+.menu-item button,.cart-item button,.checkout-button{font-size:10px}
+
+/* D3 and restaurant browser */
+.d3-head label{font-size:9px}
+.chart-card header span,.chart-card header small{font-size:9px}
+.chart-card h4{font-size:23px}
+.axis text,.grid text{font-size:10.5px}
+.bar-value{font-size:10.5px}
+.donut-label,.legend-text{font-size:9.5px}
+.score-label{font-size:9px}
+.chart-empty{font-size:12px}
+.browser-head{font-size:9px}
+.restaurant-record span{font-size:9px}
+.restaurant-record h4{font-size:21px}
+.restaurant-record p{font-size:11px;line-height:1.5}
+.restaurant-record footer small{font-size:9px}
+.loading-records{font-size:12px}
+
+/* Case study */
+.case-identity span{font-size:9px}
+.case-identity strong{font-size:23px}
+.case-identity p{font-size:13px;line-height:1.5}
+.scenario-controls span{font-size:9px}
+.scenario-controls p{font-size:13px;line-height:1.5}
+.record header,.visibility-chart-card header{font-size:9px}
+.record-primary span{font-size:9px}
+.record-row span{font-size:9px}
+.record-row b{font-size:11px}
+.visibility-label{font-size:10px}
+.visibility-value{font-size:11px}
+.visibility-axis{font-size:9px}
+.case-equation span{font-size:10px}
+
+/* Methods and bias */
+.pipeline article>span{font-size:10px}
+.pipeline p{font-size:14px;line-height:1.55}
+.pipeline small{font-size:9px}
+.formula-grid span{font-size:9px}
+.formula-grid code{font-size:14px;line-height:1.5}
+.bias-row{font-size:10px}
+.bias-row strong{font-size:17px}
+.bias-row p{font-size:14px;line-height:1.55}
+
+/* Assignment structure sections */
+.keyword-stage article b{font-size:10px}
+.lineage-track time{font-size:10px}
+.lineage-track h3{font-size:26px}
+.lineage-track p{font-size:14px;line-height:1.55}
+.precedent-fork span{font-size:10px}
+.precedent-fork strong{font-size:18px;line-height:1.35}
+.practice-map article h3{font-size:16px}
+.practice-map article p{font-size:10px;line-height:1.4}
+.audience-strip span,.method-formats span,.submission-strip span{font-size:10px}
+.audience-strip b,.method-formats b,.submission-strip b{font-size:10px}
+.s-node b{font-size:10px}
+.method-quadrants span{font-size:10px}
+.method-quadrants p{font-size:14px;line-height:1.55}
+.visual-language article>span{font-size:10px}
+.argument-ladder span{font-size:10px}
+.argument-ladder b{font-size:20px;line-height:1.3}
+.capstone-center span{font-size:10px}
+.capstone-map article b{font-size:10px}
+.capstone-caution{font-size:14px;line-height:1.55}
+.challenge-grid span{font-size:10px}
+.challenge-grid p{font-size:14px;line-height:1.55}
+.forward-plan>span,.forward-plan b{font-size:10px}
+.forward-plan p{font-size:14px;line-height:1.5}
+.exhibition-grid article>span{font-size:10px}
+.exhibition-grid p{font-size:14px;line-height:1.55}
+.screen-preview small{font-size:10px}
+
+/* Protect readability on smaller screens */
+@media(max-width:760px){
+  .brand strong{font-size:14px}
+  .eyebrow{font-size:9px}
+  .cover-footer{font-size:9px}
+  .question-mini-grid span,.question-axis span{font-size:9px}
+  .data-truth p,.map-placeholder p,.case-identity p,.scenario-controls p,
+  .pipeline p,.bias-row p,.lineage-track p,.method-quadrants p,
+  .challenge-grid p,.forward-plan p,.exhibition-grid p{font-size:13px}
+  .axis text,.grid text{font-size:10px}
+}
+
+
+
+/* =====================================================
+   DATA-RICH FINAL ASSIGNMENT PASS
+===================================================== */
+
+body{font-size:16px}
+.assignment-topbar{height:78px;padding-inline:clamp(16px,2vw,30px)}
+.brand{min-width:260px}.brand span{font-size:10px}.brand strong{font-size:16px}
+.assignment-nav{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none;padding:20px 4px}.assignment-nav::-webkit-scrollbar{display:none}
+.topbar nav{gap:18px}.topbar nav a{font-size:10px;flex:0 0 auto}
+.token-button span{font-size:10px}
+.section{padding-top:132px}
+.section-intro>p:last-child,.situated-section .section-intro>p:last-child{font-size:16px;line-height:1.55;max-width:760px;color:#c8bec1}
+.author-block{display:grid;gap:7px;margin-top:28px;padding-left:15px;border-left:2px solid var(--red)}
+.author-block span{color:var(--red);font:700 11px "Courier New",monospace;letter-spacing:.1em}
+.author-block strong{font-size:15px;letter-spacing:.015em}
+
+.foundation-viz{position:relative;z-index:3;margin-top:38px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(18,8,11,.92),rgba(6,5,5,.94));overflow:hidden}
+.foundation-viz::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(255,40,69,.035) 1px,transparent 1px),linear-gradient(rgba(255,40,69,.025) 1px,transparent 1px);background-size:42px 42px}
+.foundation-viz-head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.foundation-viz-head span{color:var(--red);font:700 10px "Courier New",monospace;letter-spacing:.1em}
+.foundation-viz-head h3{margin:8px 0 0;font-size:clamp(22px,2.2vw,34px);line-height:1;letter-spacing:-.045em}
+.foundation-viz-head small{color:var(--muted);font:700 10px "Courier New",monospace;letter-spacing:.08em}
+.mini-chart,.network-chart,.timeline-chart,.roadmap-chart,.matrix-chart,.installation-chart{position:relative;z-index:2;min-height:330px;padding:16px}
+.mini-chart svg,.network-chart svg,.timeline-chart svg,.roadmap-chart svg,.matrix-chart svg,.installation-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.source-note{position:relative;z-index:2;margin:0;padding:13px 20px;border-top:1px solid var(--line);color:#a99da0;font-size:12px;line-height:1.5}
+.source-note a{color:var(--red-soft);text-decoration:underline;text-underline-offset:3px}
+.wide-source{margin-top:0;border:1px solid var(--line);border-top:0;background:#080607}
+.viz-split{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.6fr)}
+.viz-split>.network-chart,.viz-split>.matrix-chart,.viz-split>.installation-chart{border-right:1px solid var(--line)}
+.viz-readout{padding:26px;background:rgba(7,5,6,.82);display:flex;flex-direction:column;justify-content:center}
+.viz-readout span,.timeline-readout span{color:var(--red);font:700 10px "Courier New",monospace;letter-spacing:.1em}
+.viz-readout h3,.timeline-readout h3{margin:14px 0 10px;font-size:28px;line-height:1;letter-spacing:-.04em}
+.viz-readout p,.timeline-readout p{margin:0;color:#c5babc;font-size:15px;line-height:1.55}
+.viz-readout.compact{padding:18px 20px;border-top:1px solid var(--line)}
+.viz-toggle,.map-mode-buttons button{padding:10px 13px;border:1px solid var(--line);background:transparent;color:#fff;font:700 10px "Courier New",monospace;letter-spacing:.07em;cursor:pointer}
+.viz-toggle:hover,.map-mode-buttons button:hover,.map-mode-buttons button.active{border-color:var(--red);color:var(--red)}
+
+.hero-metrics{position:absolute;z-index:5;right:var(--pad);bottom:82px;width:min(620px,49vw);margin:0;background:rgba(7,5,6,.88);backdrop-filter:blur(10px)}
+.hero-metrics .mini-chart{min-height:190px;padding:10px 16px}.hero-metrics .source-note{font-size:11px}
+.metric-bar-label{fill:#f6f1f2;font:700 12px Arial}.metric-bar-value{fill:#ff7583;font:700 12px "Courier New",monospace}.metric-bar-track{fill:rgba(255,255,255,.07)}.metric-bar-fill{fill:#ff2845}
+
+.question-data{grid-column:1/-1;margin-top:0}.question-data .mini-chart{min-height:260px}
+.chart-axis text,.chart-grid text,.axis text,.grid text{fill:#a99da0;font:11px "Courier New",monospace}.chart-axis path,.chart-axis line,.axis path,.axis line{stroke:rgba(255,255,255,.18)}.chart-grid line,.grid line{stroke:rgba(255,255,255,.07)}
+.chart-label{fill:#f6f1f2;font:700 12px Arial}.chart-note{fill:#a99da0;font:11px "Courier New",monospace}.chart-value{fill:#ff7583;font:700 12px "Courier New",monospace}
+
+.network-link{stroke:rgba(255,255,255,.13);stroke-width:1.3}.network-node{cursor:grab}.network-node circle{stroke:#080607;stroke-width:2}.network-node text{fill:#f6f1f2;font:700 11px "Courier New",monospace;pointer-events:none;text-anchor:middle}.network-node.selected circle{stroke:#fff;stroke-width:3}.network-node:hover circle{filter:drop-shadow(0 0 8px rgba(255,40,69,.65))}
+
+.timeline-readout{position:relative;z-index:2;padding:20px 24px;border-top:1px solid var(--line);background:#080607}.timeline-line{stroke:rgba(255,255,255,.17);stroke-width:2}.timeline-event{cursor:pointer}.timeline-event circle{fill:#941124;stroke:#ff2845;stroke-width:2}.timeline-event.active circle,.timeline-event:hover circle{fill:#ff2845;filter:drop-shadow(0 0 8px rgba(255,40,69,.75))}.timeline-event text{fill:#c8bec1;font:700 10px "Courier New",monospace;text-anchor:middle}
+
+.situated-data-grid{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(380px,.75fr);gap:14px;margin-top:38px}.situated-data-grid .foundation-viz{margin-top:0}.context-map-shell{position:relative;min-height:540px}.context-map-shell #contextMap{position:absolute;inset:0}.context-map-placeholder{position:absolute;z-index:4;inset:0;display:grid;place-content:center;text-align:center;padding:30px;background:radial-gradient(circle at center,rgba(255,40,69,.12),transparent 42%),rgba(5,5,5,.92)}.context-map-placeholder.hidden{display:none}.context-map-placeholder span{color:var(--red);font:700 11px "Courier New",monospace;letter-spacing:.1em}.context-map-placeholder p{max-width:430px;color:#b9aeb1;font-size:15px;line-height:1.55}.map-mode-buttons{display:flex;gap:7px}
+.situated-bar{cursor:pointer}.situated-bar rect{fill:#941124}.situated-bar:hover rect,.situated-bar.active rect{fill:#ff2845}.situated-bar text{fill:#f6f1f2;font:700 11px Arial}.situated-value{fill:#ff7583;font:700 11px "Courier New",monospace}
+
+.methods-data .mini-chart{min-height:280px}.methods-metrics{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}.methods-metrics div{padding:15px 18px;border-right:1px solid var(--line)}.methods-metrics div:last-child{border-right:0}.methods-metrics span{display:block;color:var(--muted);font:700 10px "Courier New",monospace;letter-spacing:.08em}.methods-metrics b{display:block;margin-top:7px;color:var(--red);font-size:22px}
+
+.risk-demo-control{display:grid;min-width:250px;gap:7px;color:#c6bcbf;font:700 10px "Courier New",monospace;letter-spacing:.08em}.risk-demo-control b{color:var(--red)}.risk-demo-control input{width:100%;accent-color:var(--red)}
+.visual-route{fill:none;stroke-linecap:round}.visual-point{fill:#050505;stroke:#ff2845}.visual-annotation{fill:#f6f1f2;font:700 11px "Courier New",monospace}
+
+.argument-data{grid-column:1/-1}.argument-data .mini-chart{min-height:320px}
+.roadmap-bar{fill:#941124;cursor:pointer}.roadmap-bar:hover,.roadmap-bar.active{fill:#ff2845}.roadmap-label{fill:#f6f1f2;font:700 11px Arial}.roadmap-date{fill:#a99da0;font:10px "Courier New",monospace}
+.matrix-point{cursor:pointer}.matrix-point circle{fill:#941124;stroke:#ff7583;stroke-width:2}.matrix-point.active circle,.matrix-point:hover circle{fill:#ff2845;stroke:#fff}.matrix-point text{fill:#f6f1f2;font:700 11px "Courier New",monospace}.matrix-quadrant{fill:rgba(255,40,69,.03);stroke:rgba(255,255,255,.06)}
+.install-component{cursor:pointer}.install-component rect{fill:#13090c;stroke:#941124;stroke-width:2}.install-component.active rect,.install-component:hover rect{stroke:#ff2845;fill:#19090d}.install-component text{fill:#f6f1f2;font:700 11px "Courier New",monospace;text-anchor:middle}.install-dimension{fill:#ff7583;font:700 10px "Courier New",monospace;text-anchor:middle}
+
+.project-footer span{font-size:11px}.project-footer a{font-size:11px}
+
+@media(max-width:1100px){
+  .hero-metrics{position:relative;right:auto;bottom:auto;width:auto;margin:30px var(--pad) 70px}
+  .cover{padding-bottom:30px}.cover-footer{position:relative;left:auto;right:auto;bottom:auto;margin:20px var(--pad)}
+  .situated-data-grid{grid-template-columns:1fr}
+  .context-map-shell{min-height:480px}
+}
+@media(max-width:820px){
+  .topbar{height:72px}.brand{min-width:210px}.brand span{font-size:8px}.brand strong{font-size:14px}
+  .assignment-nav{display:none}.section{padding-top:110px}
+  .viz-split{grid-template-columns:1fr}.viz-split>.network-chart,.viz-split>.matrix-chart,.viz-split>.installation-chart{border-right:0;border-bottom:1px solid var(--line)}
+  .foundation-viz-head{align-items:flex-start;flex-direction:column}
+  .methods-metrics{grid-template-columns:1fr 1fr}.methods-metrics div:nth-child(2){border-right:0}.methods-metrics div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .mini-chart,.network-chart,.timeline-chart,.roadmap-chart,.matrix-chart,.installation-chart{min-height:280px;padding:10px}
+  .source-note{font-size:12px}.viz-readout p,.timeline-readout p{font-size:14px}
+}
+@media(max-width:520px){
+  .methods-metrics{grid-template-columns:1fr}.methods-metrics div{border-right:0;border-bottom:1px solid var(--line)}.methods-metrics div:last-child{border-bottom:0}
+  .hero-metrics{margin-inline:18px}.author-block strong{font-size:13px}
+}
+
+/* Final cover and sources refinements */
+.cover-copy{width:min(650px,50vw)}
+.hero-metrics{width:min(590px,42vw)}
+.source-library{position:relative;z-index:3;display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:18px;padding:15px 18px;border:1px solid var(--line);background:#080607}
+.source-library span{margin-right:auto;color:var(--red);font:700 10px "Courier New",monospace;letter-spacing:.1em}
+.source-library a{padding:8px 10px;border:1px solid var(--line);color:#c9bfc2;font:700 10px "Courier New",monospace;letter-spacing:.06em}
+.source-library a:hover{border-color:var(--red);color:var(--red)}
+@media(max-width:1100px){.cover-copy{width:min(680px,72vw)}.hero-metrics{width:auto}}
+@media(max-width:760px){.cover-copy{width:100%}.source-library{align-items:flex-start;flex-direction:column}.source-library span{margin-right:0}}
+
+
+/* =====================================================
+   CLEAR PAGE ARGUMENT PASS — QUESTION / EVIDENCE / ACTION / TAKEAWAY
+===================================================== */
+.page-logic{
+  position:relative;z-index:6;margin:26px 0 30px;border:1px solid rgba(255,255,255,.18);
+  background:linear-gradient(135deg,rgba(255,40,69,.055),rgba(8,6,7,.96) 38%);
+  box-shadow:0 20px 55px rgba(0,0,0,.24);overflow:hidden
+}
+.page-logic-head{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.page-logic-head span,.page-logic-head b,.logic-item span{font-family:"Courier New",monospace;letter-spacing:.09em;font-weight:700}
+.page-logic-head span{font-size:11px;color:#f6f1f2}
+.page-logic-head b{font-size:10px;color:var(--red);text-align:right}
+.page-logic-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.logic-item{position:relative;min-height:145px;padding:17px 18px 20px;border-right:1px solid rgba(255,255,255,.11)}
+.logic-item:last-child{border-right:0}
+.logic-item span{display:block;margin-bottom:13px;color:var(--red);font-size:10px}
+.logic-item p{margin:0;color:#d8d0d2;font-size:15px;line-height:1.5}
+.logic-conclusion{background:rgba(255,40,69,.095)}
+.logic-conclusion p{color:#fff;font-weight:700}
+.logic-conclusion::after{content:"";position:absolute;left:18px;right:18px;bottom:11px;height:2px;background:linear-gradient(90deg,var(--red),transparent)}
+
+/* Preserve clarity inside special page layouts. */
+.cover .page-logic{position:relative;z-index:5;width:min(1120px,calc(100vw - (2 * var(--pad))));margin-top:32px}
+.cover-copy + .page-logic{margin-left:0}
+.question .page-logic{grid-column:1/-1;margin-top:-20px}
+.interface .page-logic,.case-study .page-logic{margin-top:10px}
+.argument .page-logic{position:relative;z-index:4}
+
+/* Review-room readability. */
+body{font-size:16px}
+.topbar nav a{font-size:11px}
+.brand span{font-size:10px}.brand strong{font-size:16px}.token-button span{font-size:11px}
+.eyebrow{font-size:11px}.source-note{font-size:12px;line-height:1.5}
+.foundation-viz-head span,.foundation-viz-head small{font-size:10px}
+.viz-readout p,.timeline-readout p{font-size:15px;line-height:1.55}
+.chart-axis text,.network-node text,.chart-label,.chart-value,.chart-note{font-size:11px}
+.tool-toolbar span,.map-legend span,.map-instruction,.data-truth{font-size:10px}
+
+@media(max-width:1180px){
+  .page-logic-grid{grid-template-columns:1fr 1fr}
+  .logic-item:nth-child(2){border-right:0}
+  .logic-item:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.11)}
+}
+@media(max-width:760px){
+  .page-logic{margin:20px 0 24px}
+  .page-logic-head{align-items:flex-start;flex-direction:column;gap:6px}
+  .page-logic-head b{text-align:left}
+  .page-logic-grid{grid-template-columns:1fr}
+  .logic-item{min-height:0;border-right:0;border-bottom:1px solid rgba(255,255,255,.11);padding:16px}
+  .logic-item:last-child{border-bottom:0}
+  .logic-item p{font-size:14px}
+  .topbar nav a{font-size:10px}
+}
+
+@media(min-width:1101px){
+  .cover .page-logic{width:min(650px,50vw);margin-top:26px}
+  .cover .page-logic-grid{grid-template-columns:1fr 1fr}
+  .cover .logic-item{min-height:118px}
+  .cover .logic-item:nth-child(2){border-right:0}
+  .cover .logic-item:nth-child(-n+2){border-bottom:1px solid rgba(255,255,255,.11)}
+}
+
+</style>
+</head>
+<body>
+<div aria-hidden="true" class="scroll-progress"><span id="scrollProgress"></span></div>
+<header class="topbar assignment-topbar">
+<a aria-label="Return to title" class="brand" href="#title">
+<span>YIZHANG MU · COLUMBIA GSAPP CDP</span>
+<strong>THE INVISIBLE BOSS</strong>
+</a>
+<nav aria-label="Final assignment sections" class="assignment-nav">
+<a href="#questions">QUESTIONS</a>
+<a href="#keywords">KEYWORDS</a>
+<a href="#fields">FIELDS</a>
+<a href="#lineage">LINEAGE</a>
+<a href="#practice">PRACTICE</a>
+<a href="#situated">SITUATED</a>
+<a href="#methods">METHODS</a>
+<a href="#experiments">EXPERIMENTS</a>
+<a href="#visual">VISUAL</a>
+<a href="#argument">ARGUMENT</a>
+<a href="#capstone">CAPSTONE</a>
+<a href="#challenge">CHALLENGE</a>
+<a href="#exhibition">EXHIBITION</a>
+</nav>
+<button class="token-button" id="openTokenPanel"><i></i><span>MAPBOX</span></button>
+</header>
+<aside aria-hidden="true" class="token-panel" id="tokenPanel">
+<div class="token-panel-head">
+<div><span>MAPBOX CONNECTION</span><strong>Public access token</strong></div>
+<button aria-label="Close Mapbox token panel" id="closeTokenPanel">×</button>
+</div>
+<p>A project Mapbox public token is preconfigured. Replace it here only when needed.</p>
+<input autocomplete="off" id="tokenInput" placeholder="pk.eyJ1Ijo..." type="password"/>
+<div class="token-actions">
+<button id="connectMap">CONNECT MAP</button>
+<button id="clearToken">CLEAR</button>
+</div>
+<small aria-live="polite" id="tokenMessage">Mapbox connects automatically. Each section now identifies its question, evidence, interaction, and takeaway.</small>
+</aside>
+<main>
+<!-- TITLE -->
+<section class="cover" id="title">
+<div class="cover-grid"></div>
+<div class="cover-copy">
+<p class="eyebrow reveal">RESEARCH FOUNDATIONS + PROJECT OUTLINE</p>
+<h1 class="reveal delay-1">THE<br/>INVISIBLE<br/><em>BOSS.</em></h1>
+<p class="cover-subtitle reveal delay-2">The visible route is only one layer of a delivery worker’s shift.</p>
+<div class="author-block reveal delay-2">
+<span>YIZHANG MU · HE/HIM</span>
+<strong>COLUMBIA GSAPP · COMPUTATIONAL DESIGN PRACTICES · SUMMER 2026</strong>
+</div>
+</div><aside aria-label="title page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>PROJECT ORIENTATION</span><b>OFFICIAL DATA + LIVE PROTOTYPE</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What becomes invisible when delivery work is reduced to a route and an ETA?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Official NYC labor indicators, public restaurant records, and a live spatial prototype.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Hover over the indicators, then use the navigation to follow the argument.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The street is visible; the system governing the worker is not.</p></article></div></aside>
+<div aria-hidden="true" class="cover-diagram reveal delay-2">
+<svg viewbox="0 0 740 680">
+<defs><filter id="redGlow"><fegaussianblur result="blur" stddeviation="5"></fegaussianblur><femerge><femergenode in="blur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge></filter></defs>
+<path class="street-line faint" d="M55 590L170 520L300 545L385 450L535 470L680 365"></path>
+<path class="street-line" d="M80 610L190 475L325 500L405 390L555 405L670 245"></path>
+<path class="route-line" d="M105 570C190 470 245 540 320 465S465 420 505 350S595 325 650 205"></path>
+<g class="diagram-node"><circle cx="105" cy="570" r="9"></circle><text x="105" y="605">ORDER</text></g>
+<g class="diagram-node"><circle cx="320" cy="465" r="9"></circle><text x="320" y="500">WAIT</text></g>
+<g class="diagram-node"><circle cx="505" cy="350" r="9"></circle><text x="505" y="385">RISK</text></g>
+<g class="diagram-node"><circle cx="650" cy="205" r="9"></circle><text x="650" y="240">DELIVERY</text></g>
+<text class="ghost-number" x="20" y="120">00</text>
+<text class="diagram-label" x="330" y="95">THE PLATFORM RECORDS A ROUTE.</text>
+<text class="diagram-label red" x="330" y="122">THE WORKER EXPERIENCES A SHIFT.</text>
+</svg>
+</div>
+<div class="cover-footer">
+<span>NYC · PLATFORM LABOR · MAPBOX · D3</span>
+<a href="#questions">BEGIN ↓</a>
+</div>
+<div class="foundation-viz hero-metrics reveal delay-2">
+<div class="foundation-viz-head"><div><span>NYC DELIVERY SYSTEM · OFFICIAL INDICATORS</span><h3>THE SCALE BEHIND ONE ORDER</h3></div><small>HOVER TO INSPECT</small></div>
+<div class="mini-chart" id="titleMetricsChart"></div>
+<p class="source-note">Sources: <a href="https://www.nyc.gov/site/dca/workers/Delivery-Worker-Public-Hearing-Minimum-Pay-Rate.page" rel="noopener" target="_blank">NYC DCWP minimum pay</a>; <a href="https://comptroller.nyc.gov/reports/safeguarding-outdoor-workers-in-a-changing-climate/" rel="noopener" target="_blank">NYC Comptroller worker estimate</a>; <a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q2-2024.pdf" rel="noopener" target="_blank">DCWP Q2 2024 app data</a>.</p>
+</div>
+</section>
+<!-- RESEARCH QUESTIONS -->
+<section class="question section" id="questions">
+<div class="section-number">01</div>
+<div class="question-copy reveal">
+<p class="eyebrow">RESEARCH QUESTIONS</p>
+<h2>WHO CONTROLS<br/>THE STREET<br/><em>WHEN THE BOSS<br/>IS AN INTERFACE?</em></h2>
+</div>
+<div class="question-support reveal delay-1">
+<p>How do delivery platforms translate movement, waiting, risk, and bodily labor into data—and what remains outside the record?</p>
+<div class="question-mini-grid">
+<div><span>SOCIO-TECHNICAL</span><b>Who sets the rules?</b></div>
+<div><span>URBAN</span><b>Where does risk accumulate?</b></div>
+<div><span>POLICY</span><b>What should workers contest?</b></div>
+</div>
+</div><aside aria-label="questions page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>OFFICIAL NYC DATA</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How do platforms translate movement, waiting, risk, and bodily labor into data?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>DCWP reports separate active trip time from on-call time, revealing labor outside the route.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Toggle between total weekly hours and percentage share.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>A completed trip does not represent the worker’s entire shift.</p></article></div></aside>
+<div class="question-axis reveal delay-2">
+<div><span>PLATFORM SEES</span><strong>ORDER · DISTANCE · ETA · FEE</strong></div>
+<i></i>
+<div><span>WORKER EXPERIENCES</span><strong>WAIT · RISK · BATTERY · BODY</strong></div>
+</div>
+<div class="foundation-viz question-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · WEEKLY LABOR TIME</span><h3>ACTIVE DELIVERY TIME IS NOT THE WHOLE SHIFT.</h3></div><button class="viz-toggle" id="questionMode">SHOW SHARE</button></div>
+<div class="mini-chart" id="questionsChart"></div>
+<p class="source-note">Source: <a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q1-2024.pdf" rel="noopener" target="_blank">DCWP Restaurant Delivery App Data, Q1 2024</a> — 908,000 weekly trip hours and 560,000 weekly on-call hours.</p>
+</div>
+</section>
+<!-- KEYWORDS -->
+<section class="section keywords-section" id="keywords">
+<div class="section-number">02</div>
+<div class="section-intro reveal"><p class="eyebrow">KEYWORDS · 5</p><h2>FIVE TERMS<br/>FRAME THE PROJECT.</h2></div><aside aria-label="keywords page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHORED CONCEPTUAL FRAMEWORK</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Which five concepts organize the research?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>An authored framework connects course readings, labor policy, spatial data, and interface design.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each keyword to see its role in the project.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Worker power links the project’s questions about labor, data, streets, policy, and interfaces.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · AUTHORED CONCEPT MAP</span><h3>FIVE KEYWORDS, FOUR EVIDENCE TYPES.</h3></div><small>CLICK A KEYWORD</small></div>
+<div class="viz-split"><div class="network-chart" id="keywordsChart"></div><div class="viz-readout" id="keywordsReadout"><span>SELECTED KEYWORD</span><h3>ALGORITHMIC MANAGEMENT</h3><p>How platforms convert rules into rankings, dispatch, pay, and discipline.</p></div></div>
+<p class="source-note">Authored coding framework connecting the project’s five keywords to spatial, labor, policy, and interface evidence.</p>
+</div>
+</section>
+<!-- INTERSECTING FIELDS -->
+<section class="section fields-section" id="fields">
+<div class="section-number">03</div>
+<div class="section-intro reveal"><p class="eyebrow">INTERSECTING FIELDS</p><h2>THE PROJECT SITS<br/>BETWEEN SYSTEMS.</h2><p>It connects computation, labor politics, urban design, data ethics, and interface design.</p></div><aside aria-label="fields page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHORED RESEARCH MAP</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Why can this project not be understood through computation alone?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>The network maps the methods and evidence shared by design, labor studies, mobility, ethics, and policy.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Drag or click a field to inspect its contribution.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The technical instrument must be developed together with labor, ethical, and spatial analysis.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · AUTHORED FIELD MAP</span><h3>THE PROJECT IS A CROSS-DISCIPLINARY SYSTEM.</h3></div><small>DRAG OR CLICK NODES</small></div>
+<div class="viz-split"><div class="network-chart" id="fieldsChart"></div><div class="viz-readout" id="fieldsReadout"><span>ACTIVE FIELD</span><h3>COMPUTATIONAL DESIGN</h3><p>Builds the technical instrument while questioning what the instrument measures.</p></div></div>
+<p class="source-note">Links are coded from the project bibliography, precedent study, software workflow, and policy context.</p>
+</div>
+</section>
+<!-- HISTORICAL LINEAGE -->
+<section class="section lineage-section" id="lineage">
+<div class="section-number">04</div>
+<div class="section-intro reveal"><p class="eyebrow">HISTORICAL LINEAGE</p><h2>FROM MEASURING<br/>THE WORKER TO<br/>CONTESTING THE MEASURE.</h2></div><aside aria-label="lineage page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>SOURCED HISTORICAL TIMELINE</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What historical trajectory does the project continue and contest?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A sourced timeline moves from scientific management to cybernetics, platform governance, and worker data rights.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click an event to read how its idea of measurement changes labor control.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The project turns tools of measurement into tools for inspecting and contesting measurement.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · INTERACTIVE TIMELINE</span><h3>FROM TIME STUDY TO DATA RIGHTS.</h3></div><small>CLICK AN EVENT</small></div>
+<div class="timeline-chart" id="lineageChart"></div>
+<div class="timeline-readout" id="lineageReadout"><span>2026 · WORKER RIGHTS</span><h3>$22.13 MINIMUM PAY RATE</h3><p>NYC requires app-based restaurant and grocery delivery workers to receive at least $22.13 per hour for covered time, excluding tips.</p></div>
+<p class="source-note">Sources include Taylor (1911), Wiener (1948), Critical Engineering Manifesto (2011), Data Feminism (2020), and NYC DCWP delivery-worker rules.</p>
+</div>
+<div class="precedent-fork reveal delay-2"><span>PRECEDENT STUDY → FORENSIC ARCHITECTURE</span><strong>FORK: FROM RECONSTRUCTING A PAST EVENT TO CONTESTING A LIVE SYSTEM.</strong></div>
+</section>
+<!-- COMMUNITY OF PRACTICE -->
+<section class="section practice-section" id="practice">
+<div class="section-number">05</div>
+<div class="section-intro reveal"><p class="eyebrow">COMMUNITY OF PRACTICE</p><h2>WHO IS ALREADY<br/>WORKING IN THIS SPACE?</h2></div><aside aria-label="practice page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>CURATED PRECEDENTS + POSITIONING</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Who is already working on spatial evidence, worker organizing, and data rights?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A selected community of practice compares six projects, authors, and organizations that shape my position.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click a practice to see what I adapt, extend, or question.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>My position combines spatial evidence with worker-centered data access and collective power.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · CURATED PRACTICE MAP</span><h3>POSITIONING THE PROJECT AMONG ALLIES AND CRITIQUES.</h3></div><small>CLICK A PRACTICE</small></div>
+<div class="viz-split"><div class="network-chart" id="practiceChart"></div><div class="viz-readout" id="practiceReadout"><span>MY POSITION</span><h3>INTERFACE FOR CONTESTATION</h3><p>The project combines spatial evidence, worker organizing, critical data practice, and public communication.</p></div></div>
+<p class="source-note">Selected community: Forensic Architecture, Data Feminism, Critical Engineering, Platform Cooperativism, Los Deliveristas Unidos, and Worker Info Exchange.</p>
+</div>
+<div class="audience-strip reveal delay-2"><span>AUDIENCE</span><b>DELIVERY WORKERS</b><b>LABOR ORGANIZERS</b><b>POLICY RESEARCHERS</b><b>THE PUBLIC</b></div>
+</section>
+<!-- SITUATED TECHNOLOGY -->
+<section class="section situated-section" id="situated">
+<div class="section-number">06</div>
+<div class="section-intro reveal"><p class="eyebrow">SITUATED TECHNOLOGY</p><h2>THE ORDER IS NEVER<br/>JUST AN ORDER.</h2><p>Every delivery is situated within a worker’s body, a street, a restaurant, a battery, weather, policy, and platform rules.</p></div><aside aria-label="situated page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>LIVE CONTEXT DATA + AUTHORED MODEL</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How is platform labor situated within a specific urban environment?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Live restaurant locations provide spatial context; the visibility index is an explicitly authored analytical model.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Switch the Mapbox layer and click the D3 bars to compare visible and hidden system layers.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>A delivery is shaped by uneven streets, businesses, infrastructure, rules, and bodies—not software alone.</p></article></div></aside>
+<div class="situated-data-grid reveal delay-1">
+<div class="foundation-viz map-context-panel">
+<div class="foundation-viz-head"><div><span>MAPBOX · SITUATED DENSITY</span><h3>RESTAURANTS ARE UNEVENLY DISTRIBUTED.</h3></div><div class="map-mode-buttons"><button class="active" data-context-layer="density">DENSITY</button><button data-context-layer="gradeC">GRADE C</button></div></div>
+<div class="context-map-shell"><div id="contextMap"></div><div class="context-map-placeholder" id="contextMapPlaceholder"><span>CONNECTING MAPBOX</span><p>The project token is preconfigured. This spatial layer will appear automatically.</p></div></div>
+</div>
+<div class="foundation-viz">
+<div class="foundation-viz-head"><div><span>D3 · AUTHORED VISIBILITY MODEL</span><h3>NOT EVERY PART OF THE SYSTEM IS EQUALLY VISIBLE.</h3></div><small>CLICK A BAR</small></div>
+<div class="mini-chart" id="situatedChart"></div>
+<div class="viz-readout compact" id="situatedReadout"><span>SELECTED LAYER</span><h3>PLATFORM RULES</h3><p>High operational power, low public visibility.</p></div>
+</div>
+</div>
+<p class="source-note wide-source">Live spatial source: <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" rel="noopener" target="_blank">NYC DOHMH Restaurant Inspection Results</a>. Visibility index: authored analytical framework.</p>
+</section>
+<!-- METHODS -->
+<section class="methods section methods-expanded" id="methods">
+<div class="section-number">07</div>
+<div class="methods-title reveal"><p class="eyebrow">METHODS</p><h2>TRACE THE ORDER.<br/>EXPOSE THE GAP.</h2></div><aside aria-label="methods page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>COMPLETED METHODS + PROPOSED METHODS</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How will the project produce and evaluate evidence?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Public records and route APIs are combined with future worker accounts, field observation, and material representation.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Read the pipeline, then inspect the live data-quality audit.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Missing data is not hidden; it becomes part of the research question and method.</p></article></div></aside>
+<div class="method-quadrants reveal delay-1">
+<article><span>QUANTITATIVE</span><h3>PUBLIC DATA</h3><p>Restaurant records, routes, time, distance, score distributions.</p></article>
+<article><span>QUALITATIVE</span><h3>WORKER ACCOUNTS</h3><p>Interviews, screenshots, field observation, route annotation.</p></article>
+<article><span>COMPUTATIONAL</span><h3>MAPBOX + D3</h3><p>Socrata API, GeoJSON, cross-filtering, scenario comparison.</p></article>
+<article><span>MATERIAL</span><h3>DRAWING + RECEIPT</h3><p>Printed datascape, physical evidence object, live interface.</p></article>
+</div>
+<div class="pipeline reveal delay-2">
+<article><span>01</span><h3>LOAD</h3><p>Request NYC public records.</p><small>REAL DATA</small></article>
+<article><span>02</span><h3>LOCATE</h3><p>Transform coordinates to GeoJSON.</p><small>MAPBOX</small></article>
+<article><span>03</span><h3>ROUTE</h3><p>Calculate a cycling path.</p><small>DIRECTIONS API</small></article>
+<article><span>04</span><h3>COMPARE</h3><p>Contrast visible and hidden labor.</p><small>D3 MODEL</small></article>
+</div>
+<div class="method-formats reveal delay-2"><span>LIKELY FORM</span><b>INTERACTIVE SOFTWARE</b><b>PRINTED DRAWING</b><b>PHYSICAL OBJECT</b><b>WRITTEN ARGUMENT</b></div>
+<div class="foundation-viz methods-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · DATA QUALITY AUDIT</span><h3>METHOD BEGINS BY INSPECTING THE DATASET ITSELF.</h3></div><small>LIVE AFTER DATABASE LOAD</small></div>
+<div class="mini-chart" id="methodsChart"></div>
+<div class="methods-metrics" id="methodsMetrics"><div><span>RECORDS</span><b>—</b></div><div><span>GEOCODED</span><b>—</b></div><div><span>WITH SCORE</span><b>—</b></div><div><span>CUISINES</span><b>—</b></div></div>
+<p class="source-note">Live audit of <a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" rel="noopener" target="_blank">NYC Open Data dataset 43nn-pn8j</a>. Missingness is treated as part of the method, not hidden.</p>
+</div>
+</section>
+<!-- COMPUTATIONAL DESIGN EXPERIMENTS -->
+<section class="interface section" id="experiments">
+<div class="interface-head reveal">
+<div>
+<p class="eyebrow">08A · COMPUTATIONAL DESIGN EXPERIMENT</p>
+<h2>LIVE DATA.<br/>CONTESTED REALITIES.</h2>
+</div>
+<div class="live-status" id="dataStatus"><i></i><div><span>NYC OPEN DATA</span><strong>CONNECTING</strong></div></div>
+</div>
+<aside aria-label="experiments page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>LIVE DATA + TRANSPARENT PROTOTYPE</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What can the current computational prototype reveal?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Live NYC records and Mapbox routes are kept separate from modeled pay, risk, battery, and menu values.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Filter restaurants, select a point, create a route, and compare the linked D3 views.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The prototype demonstrates how a public interface can expose both evidence and the limits of its evidence.</p></article></div></aside><div class="data-truth reveal delay-1">
+<span class="truth real">REAL</span><p>Restaurant identity, inspection record, coordinates, Mapbox basemap, and Mapbox route.</p>
+<span class="truth model">MODELED</span><p>Menu, fees, worker-pay formula, risk index, and battery use.</p>
+<span class="truth input">USER INPUT</span><p>Destination, waiting time, tip, and scenario settings.</p>
+</div>
+<div class="tool-shell reveal delay-1">
+<div class="map-side">
+<div class="tool-toolbar">
+<label class="search-control"><span>SEARCH</span><input id="searchInput" placeholder="restaurant, cuisine, street" type="search"/></label>
+<label><span>BOROUGH</span><select id="boroughFilter"><option value="ALL">ALL BOROUGHS</option></select></label>
+<label><span>GRADE</span><select id="gradeFilter"><option value="ALL">ALL GRADES</option><option value="A">GRADE A</option><option value="B">GRADE B</option><option value="C">GRADE C</option></select></label>
+<button id="resetFilters">RESET</button>
+</div>
+<div class="map-shell">
+<div aria-label="Interactive Mapbox map of New York City restaurant records" id="map"></div>
+<div class="map-placeholder" id="mapPlaceholder">
+<div><span>MAPBOX IS NOT CONNECTED</span><h3>D3 and the database are live.</h3><p>Add a public Mapbox token to reveal spatial points and cycling routes.</p><button id="placeholderTokenButton">ADD TOKEN</button></div>
+</div>
+<div class="map-legend"><span><i class="grade-a"></i>A</span><span><i class="grade-b"></i>B</span><span><i class="grade-c"></i>C</span><span><i class="route-key"></i>CYCLING ROUTE</span></div>
+<div class="map-instruction">SELECT RESTAURANT → SET DESTINATION</div>
+</div>
+</div>
+<aside class="order-side">
+<div class="order-head"><span>PLATFORM ORDER VIEW</span><strong id="resultCount">0 RECORDS</strong></div>
+<div class="selected-card" id="selectedRestaurant">
+<small>SELECTED RESTAURANT</small>
+<h3>Choose a point on the map</h3>
+<p>Or use one of the real restaurant records below the D3 charts.</p>
+</div>
+<div class="route-controls">
+<button disabled="" id="routeToColumbia">ROUTE TO COLUMBIA</button>
+<button disabled="" id="clearRoute">CLEAR ROUTE</button>
+</div>
+<div class="route-metrics">
+<div><span>DISTANCE</span><b id="distanceValue">—</b><small>REAL ROUTE</small></div>
+<div><span>BIKE ETA</span><b id="durationValue">—</b><small>REAL ROUTE</small></div>
+<div><span>BASE PAY</span><b id="payValue">—</b><small>MODELED</small></div>
+</div>
+<div class="menu-heading"><div><span>ORDER INTERFACE</span><small>prototype menu</small></div><b id="cartCount">0</b></div>
+<div class="menu-list" id="menuList"><div class="empty-state">Select a restaurant to generate a clearly labeled prototype menu.</div></div>
+<div class="cart-box">
+<div class="cart-items" id="cartItems"><p>Cart is empty.</p></div>
+<label class="tip-control"><span>TIP <b id="tipLabel">15%</b></span><input id="tipSlider" max="30" min="0" type="range" value="15"/></label>
+<div class="cart-total"><span>CUSTOMER TOTAL</span><b id="cartTotal">$0.00</b></div>
+<button disabled="" id="placeOrder">CREATE PROTOTYPE ORDER</button>
+</div>
+</aside>
+</div>
+<div class="d3-head reveal">
+<div><p class="eyebrow">LINKED D3 VIEWS</p><h3>FILTER THE DATABASE,<br/>NOT JUST THE MAP.</h3></div>
+<label><input id="syncViewport" type="checkbox"/> SYNC CHARTS TO MAP VIEW</label>
+</div>
+<div class="charts reveal delay-1">
+<article class="chart-card">
+<header><div><span>D3 BAR CHART</span><h4>Top cuisines</h4></div><small>CLICK TO FILTER</small></header>
+<div class="chart" id="cuisineChart"></div>
+</article>
+<article class="chart-card">
+<header><div><span>D3 DONUT</span><h4>Inspection grades</h4></div><small>CLICK TO FILTER</small></header>
+<div class="chart" id="gradeChart"></div>
+</article>
+<article class="chart-card wide">
+<header><div><span>D3 HISTOGRAM + BRUSH</span><h4>Inspection score distribution</h4></div><small>DRAG TO FILTER</small></header>
+<div class="chart" id="scoreChart"></div>
+<div class="score-label" id="scoreLabel">ALL SCORES</div>
+</article>
+</div>
+<div class="restaurant-browser reveal">
+<div class="browser-head"><span>REAL RESTAURANT RECORDS</span><small>SELECT A RECORD TO BEGIN A DELIVERY CASE</small></div>
+<div class="restaurant-strip" id="restaurantStrip"><div class="loading-records">Loading restaurant records…</div></div>
+</div>
+</section>
+<section class="case section" id="delivery-case">
+<div class="case-head reveal">
+<div><p class="eyebrow">08B · ONE DELIVERY / TWO RECORDS</p><h2>WHAT THE PLATFORM<br/>COUNTS—AND WHAT<br/>IT LEAVES OUT.</h2></div>
+<div class="case-identity" id="caseIdentity"><span>ACTIVE CASE</span><strong>SELECT A RESTAURANT</strong><p>Route to a destination to populate this case with real spatial metrics.</p></div>
+</div><aside aria-label="delivery-case page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>REAL ROUTE + USER-CONTROLLED SCENARIO</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What changes when one delivery is read as a worker’s experience rather than a platform record?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Real route distance and duration are combined with clearly labeled scenario inputs for waiting, pickup, and risk.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Adjust the sliders and watch the effective hourly pay, hidden time, battery, and risk change.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Time omitted by the platform can materially change how the same delivery is valued.</p></article></div></aside>
+<div class="scenario-controls reveal delay-1">
+<label><span>RESTAURANT WAIT <b id="waitLabel">8 MIN</b></span><input id="waitSlider" max="25" min="0" type="range" value="8"/></label>
+<label><span>PICKUP / PARKING <b id="pickupLabel">4 MIN</b></span><input id="pickupSlider" max="15" min="0" type="range" value="4"/></label>
+<label><span>STREET RISK <b id="riskLabel">40%</b></span><input id="riskSlider" max="100" min="0" type="range" value="40"/></label>
+<p>These red controls are explicit scenario inputs—not hidden claims about workers.</p>
+</div>
+<div class="reality-grid reveal delay-1">
+<article class="record platform-record">
+<header><span>PLATFORM RECORD</span><small>WHAT THE INTERFACE COUNTS</small></header>
+<div class="record-primary"><strong id="platformTime">—</strong><span>ROUTE MINUTES</span></div>
+<div class="record-row"><span>DISTANCE</span><b id="platformDistance">—</b></div>
+<div class="record-row"><span>ORDER PAY</span><b id="platformPay">—</b></div>
+<div class="record-row"><span>WAITING</span><b>0 MIN</b></div>
+<div class="record-row"><span>RISK</span><b>NOT PRICED</b></div>
+</article>
+<article class="record worker-record">
+<header><span>WORKER EXPERIENCE</span><small>WHAT THE BODY ABSORBS</small></header>
+<div class="record-primary"><strong id="workerTime">—</strong><span>TOTAL MINUTES</span></div>
+<div class="record-row"><span>UNPAID / HIDDEN TIME</span><b id="hiddenTime">12 MIN</b></div>
+<div class="record-row"><span>EFFECTIVE HOURLY PAY</span><b id="hourlyPay">—</b></div>
+<div class="record-row"><span>BATTERY USE</span><b id="batteryUse">—</b></div>
+<div class="record-row"><span>STREET RISK</span><b id="workerRisk">40%</b></div>
+</article>
+<article class="visibility-chart-card">
+<header><span>D3 COMPARISON</span><small>REAL ROUTE + TRANSPARENT SCENARIO INPUTS</small></header>
+<div id="visibilityChart"></div>
+</article>
+</div>
+<div class="case-equation reveal delay-2">
+<span>THE GAP</span>
+<strong id="gapStatement">SELECT A ROUTE TO CALCULATE INVISIBLE LABOR.</strong>
+</div>
+</section>
+<!-- VISUAL REPRESENTATION -->
+<section class="section visual-section" id="visual">
+<div class="section-number">09</div>
+<div class="section-intro reveal"><p class="eyebrow">VISUAL REPRESENTATION</p><h2>AESTHETICS<br/>AS EVIDENCE.</h2><p>The visual language borrows from dispatch systems, forensic diagrams, warning interfaces, receipts, and night streets.</p></div><aside aria-label="visual page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHORED REPRESENTATIONAL SYSTEM</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How does the visual language participate in the argument?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Color, line weight, layering, receipts, and warning-interface conventions encode visibility, risk, and authority.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Move the risk slider to test how the visual system responds.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Aesthetics is used to investigate and communicate power, not simply to decorate the data.</p></article></div></aside>
+<div class="visual-language reveal delay-1">
+<article class="palette-card"><span>PALETTE</span><div class="swatches"><i></i><i></i><i></i><i></i></div><h3>BLACK · OXIDE RED<br/>ALERT RED · PAPER WHITE</h3></article>
+<article class="trace-card"><span>TRACE</span><svg viewbox="0 0 500 220"><path d="M20 190C110 70 155 205 235 105S380 125 475 25"></path><circle cx="20" cy="190" r="7"></circle><circle cx="235" cy="105" r="7"></circle><circle cx="475" cy="25" r="7"></circle></svg><h3>ROUTES BECOME ARGUMENTS.</h3></article>
+<article class="layer-card"><span>LAYERS</span><div><b>PLATFORM</b><b>STREET</b><b>WORKER</b><b>POLICY</b></div><h3>SEPARATE WHAT THE INTERFACE COLLAPSES.</h3></article>
+<article class="type-card"><span>TYPE</span><strong>DATA<br/>IS NEVER<br/>NEUTRAL.</strong></article>
+</div>
+<div class="foundation-viz visual-encoding-viz reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · AUTHOR ENCODING TEST</span><h3>CHANGE THE RISK LEVEL TO TEST THE VISUAL LANGUAGE.</h3></div><label class="risk-demo-control">RISK <b id="visualRiskLabel">40%</b><input id="visualRiskSlider" max="100" min="0" type="range" value="40"/></label></div>
+<div class="mini-chart" id="visualEncodingChart"></div>
+<p class="source-note">Authored encoding system: risk controls saturation, line weight, alert density, and annotation intensity.</p>
+</div>
+</section>
+<!-- RHETORICAL ARGUMENT -->
+<section class="argument section argument-only" id="argument">
+<div class="section-number">10</div>
+<div class="argument-copy reveal">
+<p class="eyebrow">RHETORICAL ARGUMENT</p>
+<h2>TRANSPARENCY<br/>IS NOT<br/><em>ENOUGH.</em></h2>
+<p>Workers need the power to inspect, contest, and govern the systems that measure them.</p>
+</div><aside aria-label="argument page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>POLICY DATA + PROJECT SYNTHESIS</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What does the project ultimately argue?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>Policy data shows changing pay structures; the delivery case shows why visibility alone does not create agency.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Toggle the chart, then follow the sequence: see, question, contest, govern.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Workers need the ability to inspect and challenge records—not only to be shown more information.</p></article></div></aside>
+<div class="argument-ladder reveal delay-1">
+<div><span>SEE</span><b>Make hidden labor visible.</b></div>
+<div><span>QUESTION</span><b>Expose how the metric is made.</b></div>
+<div><span>CONTEST</span><b>Allow workers to challenge the record.</b></div>
+<div><span>GOVERN</span><b>Shift control over data and rules.</b></div>
+</div>
+<div class="foundation-viz argument-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · POLICY OUTCOME</span><h3>PAY ROSE, WHILE TIPS FELL.</h3></div><button class="viz-toggle" id="argumentMode">SHOW TOTAL</button></div>
+<div class="mini-chart" id="argumentChart"></div>
+<p class="source-note">Source: <a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q2-2024.pdf" rel="noopener" target="_blank">DCWP Q2 2024 app data</a> — pay per hour rose from $5.25 to $19.88; tips fell from $5.37 to $2.60.</p>
+</div>
+</section>
+<!-- POTENTIAL CAPSTONE -->
+<section class="section capstone-section" id="capstone">
+<div class="section-number">11</div>
+<div class="section-intro reveal"><p class="eyebrow">POTENTIAL CAPSTONE · NOT A FIXED SOLUTION</p><h2>A WORKER-CENTERED<br/>URBAN OBSERVATORY.</h2><p>A participatory research system combining delivery traces, testimony, street conditions, and policy data.</p></div><aside aria-label="capstone page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>PROVISIONAL RESEARCH ROADMAP</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>Where could this research develop without proposing a premature solution?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A provisional roadmap sequences listening, consent, field research, prototyping, and public presentation.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each phase to see its purpose and dependency.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The next stage begins with relationships and consent before software development.</p></article></div></aside>
+<div class="foundation-viz reveal delay-1">
+<div class="foundation-viz-head"><div><span>D3 · CAPSTONE ROADMAP</span><h3>A RESEARCH SEQUENCE, NOT A PREMATURE SOLUTION.</h3></div><small>CLICK A PHASE</small></div>
+<div class="roadmap-chart" id="capstoneChart"></div>
+<div class="timeline-readout" id="capstoneReadout"><span>PHASE 01 · LISTEN</span><h3>RELATIONSHIPS BEFORE SOFTWARE</h3><p>Build trust, establish consent, and identify what workers want documented or kept private.</p></div>
+<p class="source-note">Authored project plan for Fall 2026–Spring 2027; timing is provisional and contingent on partnerships.</p>
+</div>
+<p class="capstone-caution reveal delay-2">The next semester begins with listening and partnership—not with assuming the final solution.</p>
+</section>
+<!-- CHALLENGE -->
+<section class="section challenge-section" id="challenge">
+<div class="section-number">12</div>
+<div class="section-intro reveal"><p class="eyebrow">THE CHALLENGE</p><h2>THE AMBITION IS<br/>LARGER THAN THE<br/>CURRENT DATA.</h2></div><aside aria-label="challenge page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>AUTHOR SELF-ASSESSMENT</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>What currently prevents the project from fully supporting its ambition?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>An explicit author self-assessment compares impact and readiness across trust, data, technology, representation, and policy.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each point to inspect the limitation and the next required step.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>Worker trust, consent, and data governance are harder—and more important—than adding technical features.</p></article></div></aside>
+<div class="challenge-grid reveal delay-1">
+<article><span>RELATIONSHIPS</span><h3>BUILD TRUST</h3><p>Worker participation cannot be extracted on a studio schedule.</p></article>
+<article><span>DATA</span><h3>FIND THE MISSING RECORD</h3><p>Waiting, risk, and deactivation are rarely public.</p></article>
+<article><span>TECHNICAL</span><h3>PROTECT SENSITIVE TRACES</h3><p>Location data requires security, consent, and careful access.</p></article>
+<article><span>REPRESENTATION</span><h3>AVOID SPEAKING FOR WORKERS</h3><p>The interface must make room for disagreement and refusal.</p></article>
+</div>
+<div class="forward-plan reveal delay-2"><span>FORWARD PLAN</span><div><b>NOW</b><p>Strengthen Mapbox, D3, and visual argument.</p></div><div><b>NEXT</b><p>Interview, observe, and co-design with workers.</p></div><div><b>LATER</b><p>Prototype secure, worker-governed data infrastructure.</p></div></div>
+<div class="foundation-viz challenge-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · AUTHOR SELF-ASSESSMENT</span><h3>THE HARDEST PROBLEMS ARE NOT ALL TECHNICAL.</h3></div><small>CLICK A CHALLENGE</small></div>
+<div class="viz-split"><div class="matrix-chart" id="challengeChart"></div><div class="viz-readout" id="challengeReadout"><span>HIGHEST PRIORITY</span><h3>WORKER TRUST</h3><p>High impact, low current readiness. The next step is relationship-building rather than feature-building.</p></div></div>
+<p class="source-note">Self-assessment scored from 1–5 for project impact and current readiness; intended to make limitations explicit.</p>
+</div>
+</section>
+<!-- EXHIBITION COMPONENTS -->
+<section class="section exhibition-section" id="exhibition">
+<div class="section-number">13</div>
+<div class="section-intro reveal"><p class="eyebrow">EXHIBITION COMPONENTS</p><h2>BEYOND<br/>THE SCREEN.</h2></div><aside aria-label="exhibition page explanation" class="page-logic reveal delay-1"><div class="page-logic-head"><span>HOW TO READ THIS PAGE</span><b>EXHIBITION PROPOSAL + SCALED PLAN</b></div><div class="page-logic-grid"><article class="logic-item logic-standard"><span>01 · QUESTION</span><p>How will the argument extend beyond the website?</p></article><article class="logic-item logic-standard"><span>02 · EVIDENCE</span><p>A scaled installation plan combines a vertical datascape, a material receipt object, and an optional live screen.</p></article><article class="logic-item logic-standard"><span>03 · INTERACT</span><p>Click each component to understand its content, scale, and role.</p></article><article class="logic-item logic-conclusion"><span>04 · TAKEAWAY</span><p>The website explains the system; the drawing and object make hidden time and labor physically present.</p></article></div></aside>
+<div class="exhibition-grid reveal delay-1">
+<article class="drawing-plan"><span>PRINTED VERTICAL DRAWING</span><h3>THE ANATOMY<br/>OF A DELIVERY</h3><div class="drawing-preview"><i></i><i></i><i></i><i></i><b>PLATFORM<br/>STREET<br/>WORKER<br/>POLICY</b></div><p>36 × 72 in · vertical · matte print · suspended in Avery 100.</p></article>
+<article class="material-plan"><span>MATERIAL-SPATIAL GESTURE</span><h3>THE RECEIPT OF AN<br/>INVISIBLE SHIFT</h3><div class="receipt-preview"><b>ORDER TOTAL</b><em>$18.42</em><hr/><small>WAITING +11:08</small><small>BATTERY −21%</small><small>RISK NOT PRICED</small><small>UNPAID TIME +15:00</small></div><p>Delivery bag + extended thermal receipt + black plinth.</p></article>
+<article class="screen-plan"><span>OPTIONAL SECOND SCREEN</span><h3>ONE ORDER,<br/>TWO REALITIES</h3><div class="screen-preview"><i></i><strong>MAPBOX × D3</strong><small>LIVE DEMO + BACKUP VIDEO</small></div><p>Interactive route, data filters, and platform/worker comparison.</p></article>
+</div>
+<div class="submission-strip reveal delay-2"><span>FINAL REVIEW</span><b>WEBSITE</b><b>PRINTED DRAWING</b><b>MATERIAL GESTURE</b><b>LIVE PRESENTATION</b></div>
+<div class="source-library reveal delay-2"><span>CORE DATA SOURCES</span><a href="https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j" rel="noopener" target="_blank">NYC DOHMH RESTAURANTS ↗</a><a href="https://www.nyc.gov/site/dca/workers/Delivery-Worker-Public-Hearing-Minimum-Pay-Rate.page" rel="noopener" target="_blank">DCWP MINIMUM PAY ↗</a><a href="https://www.nyc.gov/assets/dca/downloads/pdf/workers/Restaurant-Delivery-App-Data-Q2-2024.pdf" rel="noopener" target="_blank">DCWP APP DATA ↗</a><a href="https://comptroller.nyc.gov/reports/safeguarding-outdoor-workers-in-a-changing-climate/" rel="noopener" target="_blank">OUTDOOR WORKERS REPORT ↗</a></div><footer class="project-footer"><span>THE INVISIBLE BOSS, THE VISIBLE STREET</span><span>YIZHANG MU · 2026</span><a href="#title">BACK TO TOP ↑</a></footer>
+<div class="foundation-viz exhibition-data reveal delay-2">
+<div class="foundation-viz-head"><div><span>D3 · SCALED INSTALLATION PLAN</span><h3>ONE DRAWING, ONE OBJECT, ONE LIVE SCREEN.</h3></div><small>CLICK A COMPONENT</small></div>
+<div class="viz-split"><div class="installation-chart" id="exhibitionChart"></div><div class="viz-readout" id="exhibitionReadout"><span>PRINTED DRAWING</span><h3>36 × 72 INCH VERTICAL DATASCAPE</h3><p>Suspended from the Avery 100 rail; the route becomes the spine connecting platform, street, worker, and policy layers.</p></div></div>
+<p class="source-note">Authored setup dimensions and final-review requirements; verify rail height and available table footprint before printing.</p>
+</div>
+</section>
+</main>
+<div class="confirmation" hidden="" id="confirmation">
+<div class="confirmation-card">
+<span>PROTOTYPE ORDER CREATED</span>
+<h2 id="orderNumber">ORDER #000000</h2>
+<p>This interaction was stored only in your browser. No payment was processed and no restaurant was contacted.</p>
+<button id="closeConfirmation">RETURN TO THE TOOL</button>
+</div>
+</div>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.26.0/mapbox-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+"use strict";
+
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+const DEFAULT_MAPBOX_TOKEN = "pk.eyJ1IjoiZWxpYW4zMTc4IiwiYSI6ImNtcnZlZGpkdDBvbXgyd3B2eGMyajdseDUifQ.GlgugnGUmcRzqOLIaF_16w";
+const API_URL = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
+const API_FIELDS = [
+  "camis","dba","boro","building","street","zipcode","cuisine_description",
+  "grade","score","inspection_date","latitude","longitude"
+].join(",");
+
+const state = {
+  all: [],
+  filtered: [],
+  scoreRange: null,
+  selected: null,
+  destination: null,
+  map: null,
+  mapReady: false,
+  token: "",
+  syncViewport: false,
+  contextMap: null,
+  contextMapReady: false,
+  contextLayer: "density",
+  questionShareMode: false,
+  argumentTotalMode: false,
+  cart: [],
+  tipPercent: 15,
+  route: { distanceMi: null, minutes: null, geometry: null },
+  scenario: { wait: 8, pickup: 4, risk: 40 }
+};
+
+const el = {
+  progress: $("#scrollProgress"),
+  tokenPanel: $("#tokenPanel"), tokenInput: $("#tokenInput"), tokenMessage: $("#tokenMessage"),
+  tokenButton: $("#openTokenPanel"), closeToken: $("#closeTokenPanel"), connectMap: $("#connectMap"), clearToken: $("#clearToken"),
+  placeholderTokenButton: $("#placeholderTokenButton"), mapPlaceholder: $("#mapPlaceholder"),
+  dataStatus: $("#dataStatus"), search: $("#searchInput"), borough: $("#boroughFilter"), grade: $("#gradeFilter"), reset: $("#resetFilters"),
+  resultCount: $("#resultCount"), selected: $("#selectedRestaurant"), routeToColumbia: $("#routeToColumbia"), clearRoute: $("#clearRoute"),
+  distance: $("#distanceValue"), duration: $("#durationValue"), pay: $("#payValue"),
+  menu: $("#menuList"), cartCount: $("#cartCount"), cartItems: $("#cartItems"), cartTotal: $("#cartTotal"), placeOrder: $("#placeOrder"),
+  tipSlider: $("#tipSlider"), tipLabel: $("#tipLabel"), sync: $("#syncViewport"), scoreLabel: $("#scoreLabel"), restaurantStrip: $("#restaurantStrip"),
+  waitSlider: $("#waitSlider"), waitLabel: $("#waitLabel"), pickupSlider: $("#pickupSlider"), pickupLabel: $("#pickupLabel"), riskSlider: $("#riskSlider"), riskLabel: $("#riskLabel"),
+  caseIdentity: $("#caseIdentity"), platformTime: $("#platformTime"), platformDistance: $("#platformDistance"), platformPay: $("#platformPay"),
+  workerTime: $("#workerTime"), hiddenTime: $("#hiddenTime"), hourlyPay: $("#hourlyPay"), batteryUse: $("#batteryUse"), workerRisk: $("#workerRisk"), gapStatement: $("#gapStatement"),
+  confirmation: $("#confirmation"), orderNumber: $("#orderNumber"), closeConfirmation: $("#closeConfirmation")
+};
+
+function safe(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function address(item) {
+  return [item.building, item.street, item.boro, item.zipcode].filter(Boolean).join(" · ");
+}
+
+function normalize(row) {
+  const score = Number(row.score);
+  return {
+    id: row.camis,
+    name: row.dba || "Unnamed restaurant",
+    boro: row.boro || "Unknown",
+    building: row.building || "",
+    street: row.street || "",
+    zipcode: row.zipcode || "",
+    cuisine: row.cuisine_description || "Other",
+    grade: row.grade || "N/A",
+    score: Number.isFinite(score) ? score : null,
+    inspectionDate: row.inspection_date || "",
+    lat: Number(row.latitude),
+    lng: Number(row.longitude)
+  };
+}
+
+function dedupe(rows) {
+  const seen = new Set();
+  return rows.reduce((result, row) => {
+    if (!row.camis || seen.has(row.camis)) return result;
+    const item = normalize(row);
+    if (!Number.isFinite(item.lat) || !Number.isFinite(item.lng)) return result;
+    seen.add(row.camis);
+    result.push(item);
+    return result;
+  }, []);
+}
+
+async function loadData() {
+  el.dataStatus.querySelector("strong").textContent = "CONNECTING";
+  try {
+    const params = new URLSearchParams({
+      "$select": API_FIELDS,
+      "$where": "grade in('A','B','C') AND latitude IS NOT NULL AND longitude IS NOT NULL",
+      "$order": "inspection_date DESC",
+      "$limit": "5000"
+    });
+    const response = await fetch(`${API_URL}?${params}`, { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(`NYC Open Data returned ${response.status}`);
+    state.all = dedupe(await response.json());
+    state.filtered = [...state.all];
+    populateFilters();
+    applyFilters();
+    el.dataStatus.classList.add("live");
+    el.dataStatus.querySelector("strong").textContent = `${state.all.length.toLocaleString()} LIVE RECORDS`;
+    renderLiveFoundationVisuals();
+  } catch (error) {
+    console.error(error);
+    el.dataStatus.querySelector("strong").textContent = "DATA CONNECTION FAILED";
+    el.restaurantStrip.innerHTML = `<div class="loading-records">${safe(error.message)} · Run through Live Server or GitHub Pages.</div>`;
+    drawCharts([]);
+  }
+}
+
+function populateFilters() {
+  const boroughs = [...new Set(state.all.map(d => d.boro))].sort();
+  el.borough.innerHTML = `<option value="ALL">ALL BOROUGHS</option>${boroughs.map(d => `<option value="${safe(d)}">${safe(d)}</option>`).join("")}`;
+}
+
+function applyFilters() {
+  const query = el.search.value.trim().toLowerCase();
+  const boro = el.borough.value;
+  const grade = el.grade.value;
+  state.filtered = state.all.filter(d => {
+    const text = `${d.name} ${d.cuisine} ${d.street} ${d.boro}`.toLowerCase();
+    const scoreMatch = !state.scoreRange || (d.score !== null && d.score >= state.scoreRange[0] && d.score <= state.scoreRange[1]);
+    return (!query || text.includes(query)) && (boro === "ALL" || d.boro === boro) && (grade === "ALL" || d.grade === grade) && scoreMatch;
+  });
+  el.resultCount.textContent = `${state.filtered.length.toLocaleString()} RECORDS`;
+  updateMapData();
+  drawCharts(currentChartData());
+  renderRestaurantStrip();
+  renderLiveFoundationVisuals();
+}
+
+function currentChartData() {
+  if (!state.syncViewport || !state.mapReady) return state.filtered;
+  const bounds = state.map.getBounds();
+  return state.filtered.filter(d => bounds.contains([d.lng, d.lat]));
+}
+
+function geojson(data = state.filtered) {
+  return {
+    type: "FeatureCollection",
+    features: data.map(d => ({
+      type: "Feature",
+      id: d.id,
+      geometry: { type: "Point", coordinates: [d.lng, d.lat] },
+      properties: { id: d.id, name: d.name, cuisine: d.cuisine, grade: d.grade, score: d.score ?? "", address: address(d) }
+    }))
+  };
+}
+
+function openTokenPanel() {
+  el.tokenPanel.classList.add("open");
+  el.tokenPanel.setAttribute("aria-hidden", "false");
+  setTimeout(() => el.tokenInput.focus(), 100);
+}
+function closeTokenPanel() {
+  el.tokenPanel.classList.remove("open");
+  el.tokenPanel.setAttribute("aria-hidden", "true");
+}
+
+function initMap(token) {
+  const clean = token.trim();
+  if (!clean.startsWith("pk.")) {
+    el.tokenMessage.textContent = "Use a public Mapbox token beginning with pk.";
+    el.tokenMessage.classList.add("error");
+    return;
+  }
+  if (!window.mapboxgl) {
+    el.tokenMessage.textContent = "Mapbox GL JS did not load.";
+    el.tokenMessage.classList.add("error");
+    return;
+  }
+  state.token = clean;
+  mapboxgl.accessToken = clean;
+  localStorage.setItem("ib_mapbox_token", clean);
+  el.tokenMessage.textContent = "Connecting…";
+  el.tokenMessage.classList.remove("error");
+
+  if (state.map) state.map.remove();
+  state.mapReady = false;
+  state.map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/dark-v11",
+    center: [-73.9857, 40.7484],
+    zoom: 10.2,
+    pitch: 25,
+    bearing: -8,
+    antialias: true
+  });
+  state.map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
+  state.map.addControl(new mapboxgl.FullscreenControl(), "top-right");
+
+  state.map.on("load", () => {
+    state.mapReady = true;
+    el.mapPlaceholder.classList.add("hidden");
+    el.tokenButton.classList.add("connected");
+    el.tokenMessage.textContent = "Connected. Token saved in this browser.";
+    closeTokenPanel();
+
+    state.map.addSource("restaurants", { type: "geojson", data: geojson(), cluster: true, clusterMaxZoom: 14, clusterRadius: 45, promoteId: "id" });
+    state.map.addLayer({ id: "clusters", type: "circle", source: "restaurants", filter: ["has", "point_count"], paint: {
+      "circle-color": ["step", ["get", "point_count"], "#73101c", 30, "#a91329", 100, "#d61e38", 250, "#ff2845"],
+      "circle-radius": ["step", ["get", "point_count"], 15, 30, 21, 100, 28, 250, 35],
+      "circle-stroke-width": 1, "circle-stroke-color": "rgba(255,255,255,.55)", "circle-opacity": .9
+    }});
+    state.map.addLayer({ id: "cluster-count", type: "symbol", source: "restaurants", filter: ["has", "point_count"], layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 11 }, paint: { "text-color": "#fff" } });
+    state.map.addLayer({ id: "points", type: "circle", source: "restaurants", filter: ["!", ["has", "point_count"]], paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 3.4, 14, 7.4, 18, 11],
+      "circle-color": ["match", ["get", "grade"], "A", "#ff2845", "B", "#941124", "C", "#ff7583", "#71676a"],
+      "circle-stroke-width": 1.2, "circle-stroke-color": "#130408", "circle-opacity": .88
+    }});
+    state.map.addLayer({ id: "selected-point", type: "circle", source: "restaurants", filter: ["==", ["get", "id"], ""], paint: { "circle-radius": 15, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#fff", "circle-stroke-width": 3 } });
+    state.map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+    state.map.addLayer({ id: "route-glow", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ff2845", "line-width": 12, "line-opacity": .18, "line-blur": 4 } });
+    state.map.addLayer({ id: "route", type: "line", source: "route", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ff2845", "line-width": 4, "line-opacity": .96, "line-dasharray": [1.2, 1.2] } });
+    state.map.addSource("destination", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+    state.map.addLayer({ id: "destination", type: "circle", source: "destination", paint: { "circle-radius": 9, "circle-color": "#050505", "circle-stroke-color": "#ff7583", "circle-stroke-width": 3 } });
+
+    state.map.on("click", "clusters", event => {
+      const feature = event.features[0];
+      state.map.getSource("restaurants").getClusterExpansionZoom(feature.properties.cluster_id, (error, zoom) => {
+        if (!error) state.map.easeTo({ center: feature.geometry.coordinates, zoom });
+      });
+    });
+    state.map.on("click", "points", event => {
+      event.originalEvent.cancelBubble = true;
+      const feature = event.features[0];
+      selectRestaurant(feature.properties.id, false);
+      new mapboxgl.Popup({ offset: 12 }).setLngLat(feature.geometry.coordinates).setHTML(
+        `<div class="map-popup"><span>${safe(feature.properties.cuisine)} · GRADE ${safe(feature.properties.grade)}</span><h4>${safe(feature.properties.name)}</h4><p>${safe(feature.properties.address)}</p></div>`
+      ).addTo(state.map);
+    });
+    state.map.on("mouseenter", "points", () => state.map.getCanvas().style.cursor = "pointer");
+    state.map.on("mouseleave", "points", () => state.map.getCanvas().style.cursor = "");
+    state.map.on("mouseenter", "clusters", () => state.map.getCanvas().style.cursor = "zoom-in");
+    state.map.on("mouseleave", "clusters", () => state.map.getCanvas().style.cursor = "");
+    state.map.on("click", event => {
+      if (!state.selected) return;
+      const hit = state.map.queryRenderedFeatures(event.point, { layers: ["points", "clusters"] });
+      if (hit.length) return;
+      setDestination([event.lngLat.lng, event.lngLat.lat]);
+    });
+    state.map.on("moveend", () => {
+      if (state.syncViewport) drawCharts(currentChartData());
+    });
+    updateMapData();
+    initContextMap(clean);
+    if (state.selected) selectRestaurant(state.selected.id, false);
+  });
+
+  state.map.on("error", event => {
+    const message = event.error?.message || "Mapbox could not initialize.";
+    console.error(message);
+    if (/token|401|403/i.test(message)) {
+      el.tokenMessage.textContent = message;
+      el.tokenMessage.classList.add("error");
+      el.mapPlaceholder.classList.remove("hidden");
+    }
+  });
+}
+
+function updateMapData() {
+  if (state.mapReady && state.map.getSource("restaurants")) state.map.getSource("restaurants").setData(geojson());
+  updateContextMapData();
+}
+
+function renderRestaurantStrip() {
+  const records = state.filtered.slice(0, 18);
+  if (!records.length) {
+    el.restaurantStrip.innerHTML = `<div class="loading-records">No restaurant records match these filters.</div>`;
+    return;
+  }
+  el.restaurantStrip.innerHTML = records.map(d => `
+    <article class="restaurant-record" data-id="${safe(d.id)}" tabindex="0" role="button">
+      <span>${safe(d.cuisine)} · ${safe(d.boro)}</span>
+      <h4>${safe(d.name)}</h4>
+      <p>${safe(address(d))}</p>
+      <footer><small>SCORE ${d.score ?? "N/A"}</small><b>${safe(d.grade)}</b></footer>
+    </article>`).join("");
+  $$(".restaurant-record", el.restaurantStrip).forEach(card => {
+    const activate = () => { selectRestaurant(card.dataset.id, true); $("#experiments").scrollIntoView({ behavior: "smooth", block: "start" }); };
+    card.addEventListener("click", activate);
+    card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(); } });
+  });
+}
+
+function selectRestaurant(id, fly = true) {
+  const item = state.all.find(d => d.id === id);
+  if (!item) return;
+  state.selected = item;
+  state.cart = [];
+  clearRoute(false);
+  el.selected.innerHTML = `<small>SELECTED RESTAURANT · REAL RECORD</small><h3>${safe(item.name)}</h3><p>${safe(item.cuisine)} · ${safe(item.boro)} · GRADE ${safe(item.grade)} · SCORE ${item.score ?? "N/A"}<br>${safe(address(item))}</p>`;
+  el.routeToColumbia.disabled = false;
+  el.caseIdentity.innerHTML = `<span>ACTIVE CASE</span><strong>${safe(item.name)}</strong><p>${safe(item.cuisine)} · ${safe(address(item))}</p>`;
+  renderMenu();
+  renderCart();
+  if (state.mapReady) {
+    state.map.setFilter("selected-point", ["==", ["get", "id"], item.id]);
+    if (fly) state.map.flyTo({ center: [item.lng, item.lat], zoom: 14.4, pitch: 34, essential: true });
+  }
+  updateCase();
+}
+
+const menuTemplates = {
+  Chinese: [["Red Oil Dumplings",12.5],["Mapo Tofu Rice",16],["Scallion Noodles",14.5],["Black Sesame Bun",7.5]],
+  Italian: [["Spicy Vodka Rigatoni",19],["Mushroom Pizza",21],["Little Gem Caesar",13],["Tiramisu",8.5]],
+  Japanese: [["Miso Salmon Bowl",19.5],["Spicy Tuna Roll",13],["Vegetable Udon",16],["Matcha Pudding",7.5]],
+  Mexican: [["Birria Tacos",17.5],["Chicken Mole Bowl",18],["Mushroom Tostada",13.5],["Churro Bites",7]],
+  Pizza: [["Spicy Pepperoni Pie",24],["Mushroom Square",22],["Red Caesar",12],["Cannoli",7]],
+  default: [["House Signature Bowl",16],["Crispy Chili Sandwich",15],["Roasted Market Plate",17.5],["Dark Chocolate Dessert",8]]
+};
+
+function menuForCuisine(cuisine) {
+  const key = Object.keys(menuTemplates).find(k => k !== "default" && cuisine.toLowerCase().includes(k.toLowerCase()));
+  return menuTemplates[key || "default"];
+}
+
+function renderMenu() {
+  if (!state.selected) return;
+  el.menu.innerHTML = menuForCuisine(state.selected.cuisine).map(([name, price], index) => `
+    <div class="menu-item"><div><h4>${safe(name)}</h4><p>MODELED MENU ITEM</p></div><span>$${price.toFixed(2)}</span><button data-index="${index}" data-name="${safe(name)}" data-price="${price}" aria-label="Add ${safe(name)}">+</button></div>`).join("");
+  $$(".menu-item button", el.menu).forEach(button => button.addEventListener("click", () => addCart(button.dataset.name, Number(button.dataset.price))));
+}
+
+function addCart(name, price) {
+  const existing = state.cart.find(item => item.name === name);
+  existing ? existing.quantity++ : state.cart.push({ name, price, quantity: 1 });
+  renderCart();
+}
+
+function cartTotals() {
+  const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const service = subtotal * .08;
+  const delivery = subtotal ? 3.99 : 0;
+  const tip = subtotal * state.tipPercent / 100;
+  return { subtotal, service, delivery, tip, total: subtotal + service + delivery + tip };
+}
+
+function renderCart() {
+  const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totals = cartTotals();
+  el.cartCount.textContent = count;
+  el.cartItems.innerHTML = state.cart.length ? state.cart.map(item => `<div class="cart-line"><span>${safe(item.name)} × ${item.quantity}</span><b>$${(item.price * item.quantity).toFixed(2)}</b></div>`).join("") : `<p>Cart is empty.</p>`;
+  el.tipLabel.textContent = `${state.tipPercent}%`;
+  el.cartTotal.textContent = `$${totals.total.toFixed(2)}`;
+  el.placeOrder.disabled = !count;
+  updateCase();
+}
+
+function setDestination(coords) {
+  state.destination = coords;
+  if (state.mapReady) state.map.getSource("destination").setData({ type: "Feature", geometry: { type: "Point", coordinates: coords }, properties: {} });
+  el.clearRoute.disabled = false;
+  requestRoute();
+}
+
+async function requestRoute() {
+  if (!state.selected || !state.destination || !state.token || !state.mapReady) return;
+  el.distance.textContent = el.duration.textContent = "…";
+  try {
+    const start = `${state.selected.lng},${state.selected.lat}`;
+    const end = state.destination.join(",");
+    const response = await fetch(`https://api.mapbox.com/directions/v5/mapbox/cycling/${start};${end}?geometries=geojson&overview=full&steps=false&access_token=${encodeURIComponent(state.token)}`);
+    if (!response.ok) throw new Error(`Directions returned ${response.status}`);
+    const json = await response.json();
+    const route = json.routes?.[0];
+    if (!route) throw new Error("No cycling route returned.");
+    state.route.distanceMi = route.distance / 1609.344;
+    state.route.minutes = route.duration / 60;
+    state.route.geometry = route.geometry;
+    state.map.getSource("route").setData({ type: "Feature", geometry: route.geometry, properties: {} });
+    const coords = route.geometry.coordinates;
+    const bounds = coords.reduce((box, point) => box.extend(point), new mapboxgl.LngLatBounds(coords[0], coords[0]));
+    state.map.fitBounds(bounds, { padding: 80, maxZoom: 15, duration: 1000 });
+    updateCase();
+  } catch (error) {
+    console.error(error);
+    el.distance.textContent = el.duration.textContent = "ERROR";
+  }
+}
+
+function clearRoute(resetDestination = true) {
+  state.route = { distanceMi: null, minutes: null, geometry: null };
+  if (resetDestination) state.destination = null;
+  el.distance.textContent = el.duration.textContent = el.pay.textContent = "—";
+  el.clearRoute.disabled = true;
+  if (state.mapReady) {
+    state.map.getSource("route")?.setData({ type: "FeatureCollection", features: [] });
+    state.map.getSource("destination")?.setData({ type: "FeatureCollection", features: [] });
+  }
+  updateCase();
+}
+
+function calculateCase() {
+  const distance = state.route.distanceMi;
+  const routeMinutes = state.route.minutes;
+  if (!Number.isFinite(distance) || !Number.isFinite(routeMinutes)) return null;
+  const basePay = 3.2 + distance * 1.4 + routeMinutes * .14;
+  const hiddenMinutes = state.scenario.wait + state.scenario.pickup;
+  const workerMinutes = routeMinutes + hiddenMinutes;
+  const tip = cartTotals().tip;
+  const hourly = (basePay + tip) / workerMinutes * 60;
+  const battery = Math.min(100, distance * 5 + workerMinutes * .12);
+  return { distance, routeMinutes, basePay, hiddenMinutes, workerMinutes, tip, hourly, battery, risk: state.scenario.risk };
+}
+
+function updateCase() {
+  el.waitLabel.textContent = `${state.scenario.wait} MIN`;
+  el.pickupLabel.textContent = `${state.scenario.pickup} MIN`;
+  el.riskLabel.textContent = `${state.scenario.risk}%`;
+  el.workerRisk.textContent = `${state.scenario.risk}%`;
+  el.hiddenTime.textContent = `${state.scenario.wait + state.scenario.pickup} MIN`;
+  const result = calculateCase();
+  if (!result) {
+    el.platformTime.textContent = el.platformDistance.textContent = el.platformPay.textContent = "—";
+    el.workerTime.textContent = el.hourlyPay.textContent = el.batteryUse.textContent = "—";
+    el.distance.textContent = el.duration.textContent = el.pay.textContent = "—";
+    el.gapStatement.textContent = state.selected ? "SET A DELIVERY DESTINATION TO CALCULATE THE GAP." : "SELECT A RESTAURANT AND ROUTE TO CALCULATE INVISIBLE LABOR.";
+    drawVisibilityChart(null);
+    return;
+  }
+  el.distance.textContent = `${result.distance.toFixed(2)} MI`;
+  el.duration.textContent = `${Math.round(result.routeMinutes)} MIN`;
+  el.pay.textContent = `$${result.basePay.toFixed(2)}`;
+  el.platformTime.textContent = `${Math.round(result.routeMinutes)}`;
+  el.platformDistance.textContent = `${result.distance.toFixed(2)} MI`;
+  el.platformPay.textContent = `$${result.basePay.toFixed(2)}`;
+  el.workerTime.textContent = `${Math.round(result.workerMinutes)}`;
+  el.hourlyPay.textContent = `$${result.hourly.toFixed(2)}/HR`;
+  el.batteryUse.textContent = `${result.battery.toFixed(1)}%`;
+  const hiddenShare = result.hiddenMinutes / result.workerMinutes * 100;
+  el.gapStatement.textContent = `${result.hiddenMinutes} MINUTES — ${hiddenShare.toFixed(0)}% OF THIS DELIVERY — EXIST OUTSIDE THE PLATFORM'S ROUTE RECORD.`;
+  drawVisibilityChart(result);
+}
+
+function drawCharts(data) {
+  if (!window.d3) return;
+  drawCuisine(data);
+  drawGrade(data);
+  drawScore(data);
+}
+
+function drawCuisine(data) {
+  const root = d3.select("#cuisineChart"); root.selectAll("*").remove();
+  const rows = d3.rollups(data, values => values.length, d => d.cuisine).sort((a,b) => b[1]-a[1]).slice(0,10);
+  if (!rows.length) { root.append("div").attr("class","chart-empty").text("No cuisine data in this selection."); return; }
+  const w=650,h=330,m={t:14,r:48,b:26,l:160};
+  const x=d3.scaleLinear().domain([0,d3.max(rows,d=>d[1])||1]).nice().range([m.l,w-m.r]);
+  const y=d3.scaleBand().domain(rows.map(d=>d[0])).range([m.t,h-m.b]).padding(.21);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Top cuisines bar chart");
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(5).tickSize(-(h-m.t-m.b))).call(g=>g.select(".domain").remove());
+  svg.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).tickSize(0)).call(g=>g.select(".domain").remove());
+  const bars=svg.selectAll(".d3-bar").data(rows).join("rect").attr("class",d=>`d3-bar${el.search.value===d[0]?" selected":""}`).attr("x",m.l).attr("y",d=>y(d[0])).attr("height",y.bandwidth()).attr("width",0).attr("tabindex",0).on("click keydown",(event,d)=>{
+    if(event.type==="keydown"&&event.key!=="Enter"&&event.key!==" ")return;
+    event.preventDefault(); el.search.value=el.search.value===d[0]?"":d[0]; applyFilters();
+  });
+  bars.transition().duration(550).attr("width",d=>Math.max(1,x(d[1])-m.l));
+  svg.selectAll(".bar-value").data(rows).join("text").attr("class","bar-value").attr("x",d=>x(d[1])+7).attr("y",d=>y(d[0])+y.bandwidth()/2).attr("dominant-baseline","middle").text(d=>d[1]);
+}
+
+function drawGrade(data) {
+  const root=d3.select("#gradeChart"); root.selectAll("*").remove();
+  const rows=["A","B","C"].map(grade=>({grade,value:data.filter(d=>d.grade===grade).length}));
+  const total=d3.sum(rows,d=>d.value); if(!total){root.append("div").attr("class","chart-empty").text("No grade data in this selection.");return;}
+  const w=390,h=330,r=117,colors={A:"#ff2845",B:"#941124",C:"#ff7583"};
+  const pie=d3.pie().sort(null).value(d=>d.value),arc=d3.arc().innerRadius(70).outerRadius(r);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Inspection grade donut chart");
+  const g=svg.append("g").attr("transform",`translate(${w/2},${h/2-8})`);
+  g.selectAll("path").data(pie(rows)).join("path").attr("class",d=>`grade-arc${el.grade.value===d.data.grade?" selected":""}`).attr("fill",d=>colors[d.data.grade]).attr("d",arc).attr("tabindex",0).on("click keydown",(event,d)=>{
+    if(event.type==="keydown"&&event.key!=="Enter"&&event.key!==" ")return;
+    event.preventDefault(); el.grade.value=el.grade.value===d.data.grade?"ALL":d.data.grade; applyFilters();
+  });
+  g.append("text").attr("class","donut-total").attr("text-anchor","middle").attr("y",-2).text(total.toLocaleString());
+  g.append("text").attr("class","donut-label").attr("text-anchor","middle").attr("y",18).text("RESTAURANTS");
+  rows.forEach((d,i)=>{const lg=svg.append("g").attr("transform",`translate(${32+i*110},${h-28})`);lg.append("rect").attr("width",10).attr("height",10).attr("fill",colors[d.grade]);lg.append("text").attr("class","legend-text").attr("x",17).attr("y",9).text(`${d.grade}  ${d.value}`);});
+}
+
+function drawScore(data) {
+  const root=d3.select("#scoreChart"); root.selectAll("*").remove();
+  const values=data.map(d=>d.score).filter(Number.isFinite); if(!values.length){root.append("div").attr("class","chart-empty").text("No inspection scores in this selection.");return;}
+  const w=960,h=285,m={t:15,r:20,b:38,l:46};
+  const x=d3.scaleLinear().domain([0,Math.max(50,d3.max(values))]).nice().range([m.l,w-m.r]);
+  const bins=d3.bin().domain(x.domain()).thresholds(x.ticks(24))(values);
+  const y=d3.scaleLinear().domain([0,d3.max(bins,d=>d.length)]).nice().range([h-m.b,m.t]);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Inspection score histogram with brush filter");
+  svg.append("g").attr("class","grid").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(w-m.l-m.r))).call(g=>g.select(".domain").remove());
+  svg.selectAll(".hist-bar").data(bins).join("rect").attr("class","hist-bar").attr("x",d=>x(d.x0)+1).attr("y",d=>y(d.length)).attr("width",d=>Math.max(0,x(d.x1)-x(d.x0)-2)).attr("height",d=>y(0)-y(d.length));
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(12));
+  const brush=d3.brushX().extent([[m.l,m.t],[w-m.r,h-m.b]]).on("end",event=>{
+    if(!event.sourceEvent)return;
+    if(!event.selection){state.scoreRange=null;el.scoreLabel.textContent="ALL SCORES";}
+    else{const [a,b]=event.selection.map(x.invert);state.scoreRange=[Math.floor(a),Math.ceil(b)];el.scoreLabel.textContent=`SCORE ${state.scoreRange[0]}–${state.scoreRange[1]}`;}
+    applyFilters();
+  });
+  svg.append("g").attr("class","brush").call(brush);
+}
+
+function drawVisibilityChart(result) {
+  const root=d3.select("#visibilityChart"); root.selectAll("*").remove();
+  if(!result){root.append("div").attr("class","chart-empty").text("Route a delivery to generate the comparison.");return;}
+  const metrics=[
+    {label:"TIME",unit:"MIN",platform:result.routeMinutes,worker:result.workerMinutes},
+    {label:"WAITING",unit:"MIN",platform:0,worker:result.hiddenMinutes},
+    {label:"RISK",unit:"%",platform:0,worker:result.risk},
+    {label:"BATTERY",unit:"%",platform:0,worker:result.battery}
+  ];
+  const w=620,h=410,m={t:20,r:38,b:35,l:100};
+  const groups=d3.scaleBand().domain(metrics.map(d=>d.label)).range([m.t,h-m.b]).padding(.24);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Platform record versus worker experience comparison chart");
+  metrics.forEach(metric=>{
+    const max=Math.max(metric.platform,metric.worker,1);
+    const x=d3.scaleLinear().domain([0,max]).range([m.l,w-m.r]);
+    const y=groups(metric.label);
+    svg.append("text").attr("class","visibility-label").attr("x",0).attr("y",y+11).text(metric.label);
+    svg.append("rect").attr("x",m.l).attr("y",y).attr("width",w-m.l-m.r).attr("height",13).attr("fill","rgba(255,255,255,.055)");
+    svg.append("rect").attr("x",m.l).attr("y",y).attr("width",0).attr("height",13).attr("fill","#941124").transition().duration(550).attr("width",x(metric.platform)-m.l);
+    svg.append("text").attr("class","visibility-value").attr("x",Math.max(m.l+4,x(metric.platform)+6)).attr("y",y+10).text(`PLATFORM ${formatMetric(metric.platform,metric.unit)}`);
+    svg.append("rect").attr("x",m.l).attr("y",y+23).attr("width",w-m.l-m.r).attr("height",13).attr("fill","rgba(255,255,255,.055)");
+    svg.append("rect").attr("x",m.l).attr("y",y+23).attr("width",0).attr("height",13).attr("fill","#ff2845").transition().duration(650).attr("width",x(metric.worker)-m.l);
+    svg.append("text").attr("class","visibility-value").attr("x",Math.max(m.l+4,x(metric.worker)+6)).attr("y",y+33).text(`WORKER ${formatMetric(metric.worker,metric.unit)}`);
+  });
+  svg.append("text").attr("class","visibility-axis").attr("x",m.l).attr("y",h-6).text("EACH METRIC USES ITS OWN SCALE · COMPARISON IS WITHIN METRIC");
+}
+
+function formatMetric(value, unit){return `${value.toFixed(value<10&&value!==0?1:0)} ${unit}`;}
+
+
+
+// =====================================================
+// FOUNDATION VISUALIZATIONS — DATA SUPPORT ON EACH SECTION
+// =====================================================
+const OFFICIAL_DATA = {
+  workers: 65000,
+  weeklyDeliveries: 2640000,
+  minPay2026: 22.13,
+  q1Hours: [
+    { label: "TRIP TIME", value: 908000, note: "time performing deliveries" },
+    { label: "ON-CALL TIME", value: 560000, note: "connected and available" }
+  ],
+  payTrend: [
+    { period: "Q2 2023", pay: 5.25, tips: 5.37, total: 10.62 },
+    { period: "Q2 2024", pay: 19.88, tips: 2.60, total: 22.48 }
+  ],
+  payRates: [
+    { year: 2023, rate: 17.96 },
+    { year: 2024, rate: 19.56 },
+    { year: 2025, rate: 21.44 },
+    { year: 2026, rate: 22.13 }
+  ]
+};
+
+function clearRoot(selector) {
+  const root = d3.select(selector);
+  root.selectAll("*").remove();
+  return root;
+}
+
+function renderTitleMetrics() {
+  const root = clearRoot("#titleMetricsChart");
+  if (root.empty()) return;
+  const loaded = state.all.length || 0;
+  const data = [
+    { label: "NYC DELIVERY WORKERS", value: OFFICIAL_DATA.workers, display: "≈65,000", max: 3000000 },
+    { label: "DELIVERIES / WEEK", value: OFFICIAL_DATA.weeklyDeliveries, display: "2.64M", max: 3000000 },
+    { label: "2026 MINIMUM PAY", value: OFFICIAL_DATA.minPay2026 * 100000, display: "$22.13/HR", max: 3000000 },
+    { label: "LIVE RESTAURANTS LOADED", value: loaded * 500, display: loaded ? loaded.toLocaleString() : "LOADING", max: 3000000 }
+  ];
+  const w = 700, h = 210, m = {t:14,r:105,b:12,l:190};
+  const x = d3.scaleLinear().domain([0,d3.max(data,d=>d.max)]).range([m.l,w-m.r]);
+  const y = d3.scaleBand().domain(data.map(d=>d.label)).range([m.t,h-m.b]).padding(.28);
+  const svg = root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","NYC delivery system indicators");
+  svg.selectAll(".metric-bar-track").data(data).join("rect").attr("class","metric-bar-track").attr("x",m.l).attr("y",d=>y(d.label)).attr("height",y.bandwidth()).attr("width",w-m.l-m.r);
+  svg.selectAll(".metric-bar-fill").data(data).join("rect").attr("class","metric-bar-fill").attr("x",m.l).attr("y",d=>y(d.label)).attr("height",y.bandwidth()).attr("width",0).transition().duration(700).attr("width",d=>Math.max(3,x(d.value)-m.l));
+  svg.selectAll(".metric-bar-label").data(data).join("text").attr("class","metric-bar-label").attr("x",m.l-12).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("text-anchor","end").attr("dominant-baseline","middle").text(d=>d.label);
+  svg.selectAll(".metric-bar-value").data(data).join("text").attr("class","metric-bar-value").attr("x",w-m.r+12).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("dominant-baseline","middle").text(d=>d.display);
+}
+
+function renderQuestionsChart() {
+  const root = clearRoot("#questionsChart"); if(root.empty()) return;
+  const data = OFFICIAL_DATA.q1Hours;
+  const total = d3.sum(data,d=>d.value);
+  const rows = data.map(d=>({...d, shown: state.questionShareMode ? d.value/total*100 : d.value}));
+  const w=960,h=260,m={t:28,r:150,b:42,l:170};
+  const x=d3.scaleLinear().domain([0,d3.max(rows,d=>d.shown)*1.08]).range([m.l,w-m.r]);
+  const y=d3.scaleBand().domain(rows.map(d=>d.label)).range([m.t,h-m.b]).padding(.34);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Weekly trip and on-call hours for delivery workers");
+  svg.append("g").attr("class","chart-grid").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat(d=>state.questionShareMode?`${d}%`:`${d/1000}k`).tickSize(-(h-m.t-m.b))).call(g=>g.select(".domain").remove());
+  svg.selectAll(".qbar").data(rows).join("rect").attr("x",m.l).attr("y",d=>y(d.label)).attr("height",y.bandwidth()).attr("width",0).attr("fill",(d,i)=>i===0?"#ff2845":"#941124").transition().duration(650).attr("width",d=>x(d.shown)-m.l);
+  svg.selectAll(".chart-label").data(rows).join("text").attr("class","chart-label").attr("x",m.l-14).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("text-anchor","end").attr("dominant-baseline","middle").text(d=>d.label);
+  svg.selectAll(".chart-value").data(rows).join("text").attr("class","chart-value").attr("x",d=>x(d.shown)+10).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("dominant-baseline","middle").text(d=>state.questionShareMode?`${d.shown.toFixed(1)}%`:`${(d.value/1000).toFixed(0)}K HOURS`);
+  svg.selectAll(".chart-note").data(rows).join("text").attr("class","chart-note").attr("x",m.l).attr("y",d=>y(d.label)+y.bandwidth()+17).text(d=>d.note.toUpperCase());
+}
+
+const keywordData = [
+  {id:"ALGORITHMIC MANAGEMENT",r:46,desc:"How platforms convert rules into rankings, dispatch, pay, and discipline.",links:["POLICY","INTERFACE","LABOR"]},
+  {id:"PLATFORM LABOR",r:42,desc:"Work organized through software while employment protections remain contested.",links:["LABOR","POLICY","STREET"]},
+  {id:"URBAN MOBILITY",r:39,desc:"Movement is shaped by street design, restaurant density, weather, and infrastructure.",links:["STREET","SPATIAL DATA"]},
+  {id:"DATA VISIBILITY",r:37,desc:"What enters the record becomes governable; what is omitted becomes harder to contest.",links:["SPATIAL DATA","INTERFACE","POLICY"]},
+  {id:"WORKER POWER",r:44,desc:"The ability to inspect, challenge, and collectively govern the systems that measure work.",links:["LABOR","POLICY","INTERFACE"]},
+  {id:"LABOR",r:24,type:"evidence"},{id:"POLICY",r:24,type:"evidence"},{id:"INTERFACE",r:24,type:"evidence"},{id:"STREET",r:24,type:"evidence"},{id:"SPATIAL DATA",r:24,type:"evidence"}
+];
+
+function renderForceNetwork(selector, nodes, links, readoutSelector, defaultId) {
+  const root=clearRoot(selector); if(root.empty()) return;
+  const w=760,h=480;
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Interactive network diagram");
+  const nodeCopies=nodes.map(d=>({...d}));
+  const linkCopies=links.map(d=>({...d}));
+  const simulation=d3.forceSimulation(nodeCopies).force("link",d3.forceLink(linkCopies).id(d=>d.id).distance(d=>d.distance||115).strength(.6)).force("charge",d3.forceManyBody().strength(d=>d.type==="core"?-650:-260)).force("center",d3.forceCenter(w/2,h/2)).force("collision",d3.forceCollide().radius(d=>(d.r||30)+12));
+  const link=svg.append("g").selectAll("line").data(linkCopies).join("line").attr("class","network-link");
+  const node=svg.append("g").selectAll("g").data(nodeCopies).join("g").attr("class",d=>`network-node${d.id===defaultId?" selected":""}`).call(d3.drag().on("start",(event,d)=>{if(!event.active)simulation.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;}).on("drag",(event,d)=>{d.fx=event.x;d.fy=event.y;}).on("end",(event,d)=>{if(!event.active)simulation.alphaTarget(0);d.fx=null;d.fy=null;}));
+  node.append("circle").attr("r",d=>d.r||30).attr("fill",d=>d.type==="evidence"?"#941124":d.type==="core"?"#ff2845":"#6f0d1b");
+  node.append("text").attr("dy",".35em").each(function(d){const words=d.id.split(" ");const text=d3.select(this);if(words.length<=2)text.text(d.id);else{words.forEach((word,i)=>text.append("tspan").attr("x",0).attr("dy",i?13:-6).text(word));}});
+  node.on("click",(event,d)=>{node.classed("selected",n=>n.id===d.id);const read=$(readoutSelector);if(read){read.querySelector("span").textContent=d.type==="evidence"?"EVIDENCE DOMAIN":"SELECTED NODE";read.querySelector("h3").textContent=d.id;read.querySelector("p").textContent=d.desc||"This evidence domain connects multiple parts of the research framework.";}});
+  simulation.on("tick",()=>{link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);node.attr("transform",d=>`translate(${Math.max(55,Math.min(w-55,d.x))},${Math.max(45,Math.min(h-45,d.y))})`);});
+}
+
+function renderKeywordsChart(){
+  const nodes=keywordData;
+  const links=[];nodes.filter(d=>d.links).forEach(d=>d.links.forEach(target=>links.push({source:d.id,target})));
+  renderForceNetwork("#keywordsChart",nodes,links,"#keywordsReadout","ALGORITHMIC MANAGEMENT");
+}
+
+function renderFieldsChart(){
+  const nodes=[
+    {id:"PROJECT",type:"core",r:55,desc:"A worker-centered urban interface that connects computation, labor, mobility, policy, and representation."},
+    {id:"COMPUTATIONAL DESIGN",r:42,desc:"Builds the technical instrument while questioning what the instrument measures."},
+    {id:"LABOR STUDIES",r:39,desc:"Examines classification, wages, working conditions, and collective power."},
+    {id:"URBAN MOBILITY",r:39,desc:"Locates platform labor within streets, routes, infrastructure, and weather."},
+    {id:"DATA ETHICS",r:36,desc:"Asks who collects, owns, interprets, and can refuse data."},
+    {id:"INTERFACE DESIGN",r:38,desc:"Studies how visual choices frame action, authority, and visibility."},
+    {id:"POLICY",type:"evidence",r:28},{id:"MAPBOX + D3",type:"evidence",r:31},{id:"WORKER TESTIMONY",type:"evidence",r:30}
+  ];
+  const links=[
+    ["PROJECT","COMPUTATIONAL DESIGN"],["PROJECT","LABOR STUDIES"],["PROJECT","URBAN MOBILITY"],["PROJECT","DATA ETHICS"],["PROJECT","INTERFACE DESIGN"],
+    ["COMPUTATIONAL DESIGN","MAPBOX + D3"],["URBAN MOBILITY","MAPBOX + D3"],["LABOR STUDIES","WORKER TESTIMONY"],["DATA ETHICS","WORKER TESTIMONY"],["LABOR STUDIES","POLICY"],["DATA ETHICS","POLICY"],["INTERFACE DESIGN","MAPBOX + D3"]
+  ].map(([source,target])=>({source,target}));
+  renderForceNetwork("#fieldsChart",nodes,links,"#fieldsReadout","COMPUTATIONAL DESIGN");
+}
+
+function renderLineageChart(){
+  const root=clearRoot("#lineageChart");if(root.empty())return;
+  const events=[
+    {year:1911,title:"SCIENTIFIC MANAGEMENT",value:"TIME STUDY",desc:"Work is decomposed into measurable actions and optimized from above."},
+    {year:1948,title:"CYBERNETICS",value:"FEEDBACK",desc:"Control becomes a problem of information, feedback, and system regulation."},
+    {year:2011,title:"CRITICAL ENGINEERING",value:"INFRASTRUCTURE AS POLITICS",desc:"Engineering is treated as a language that shapes users and power."},
+    {year:2016,title:"PLATFORM CAPITALISM",value:"APP GOVERNANCE",desc:"Digital intermediaries coordinate markets while extracting data and control."},
+    {year:2020,title:"DATA FEMINISM",value:"POWER IN DATA",desc:"Data practices are situated within unequal social and institutional relations."},
+    {year:2021,title:"NYC DELIVERY LAWS",value:"RIGHTS PACKAGE",desc:"New York City establishes rights concerning routes, tips, bags, and pay information."},
+    {year:2023,title:"MINIMUM PAY ENFORCED",value:"$17.96 / HR",desc:"NYC begins enforcing a minimum pay standard for app-based restaurant delivery workers."},
+    {year:2026,title:"WORKER RIGHTS",value:"$22.13 / HR",desc:"The minimum pay rate reaches $22.13 and expanded pay-statement protections take effect."}
+  ];
+  const w=1120,h=330,m={l:70,r:70,t:65,b:55};const x=d3.scaleLinear().domain([1911,2026]).range([m.l,w-m.r]);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Timeline from scientific management to delivery worker data rights");
+  svg.append("line").attr("class","timeline-line").attr("x1",m.l).attr("x2",w-m.r).attr("y1",h/2).attr("y2",h/2);
+  const g=svg.selectAll(".timeline-event").data(events).join("g").attr("class",d=>`timeline-event${d.year===2026?" active":""}`).attr("transform",d=>`translate(${x(d.year)},${h/2})`).on("click",(event,d)=>{g.classed("active",n=>n.year===d.year);const r=$("#lineageReadout");r.querySelector("span").textContent=`${d.year} · ${d.title}`;r.querySelector("h3").textContent=d.value;r.querySelector("p").textContent=d.desc;});
+  g.append("line").attr("y1",0).attr("y2",(d,i)=>i%2===0?-62:62).attr("stroke","rgba(255,255,255,.18)");
+  g.append("circle").attr("r",9);
+  g.append("text").attr("y",(d,i)=>i%2===0?-80:85).text(d=>d.year);
+  g.append("text").attr("y",(d,i)=>i%2===0?-64:101).each(function(d){const text=d3.select(this);d.title.split(" ").slice(0,2).forEach((word,i)=>text.append("tspan").attr("x",0).attr("dy",i?12:0).text(word));});
+}
+
+function renderPracticeChart(){
+  const nodes=[
+    {id:"MY POSITION",type:"core",r:56,desc:"Design an interface for contestation rather than surveillance."},
+    {id:"FORENSIC ARCHITECTURE",r:42,desc:"Reconstructs events through spatial evidence, open-source investigation, and counter-forensics."},
+    {id:"DATA FEMINISM",r:39,desc:"Makes power, context, embodiment, and labor central to data practice."},
+    {id:"CRITICAL ENGINEERING",r:38,desc:"Treats technical systems as political and cultural constructions."},
+    {id:"PLATFORM COOPERATIVISM",r:40,desc:"Explores worker ownership and democratic governance of digital platforms."},
+    {id:"LOS DELIVERISTAS UNIDOS",r:43,desc:"Organizes delivery workers around safety, pay, dignity, and collective rights."},
+    {id:"WORKER INFO EXCHANGE",r:39,desc:"Develops tools and research around worker data access and algorithmic accountability."},
+    {id:"SPATIAL EVIDENCE",type:"evidence",r:27},{id:"COLLECTIVE POWER",type:"evidence",r:28},{id:"DATA RIGHTS",type:"evidence",r:26}
+  ];
+  const links=[
+    ["MY POSITION","FORENSIC ARCHITECTURE"],["MY POSITION","DATA FEMINISM"],["MY POSITION","CRITICAL ENGINEERING"],["MY POSITION","PLATFORM COOPERATIVISM"],["MY POSITION","LOS DELIVERISTAS UNIDOS"],["MY POSITION","WORKER INFO EXCHANGE"],
+    ["FORENSIC ARCHITECTURE","SPATIAL EVIDENCE"],["DATA FEMINISM","DATA RIGHTS"],["WORKER INFO EXCHANGE","DATA RIGHTS"],["LOS DELIVERISTAS UNIDOS","COLLECTIVE POWER"],["PLATFORM COOPERATIVISM","COLLECTIVE POWER"],["CRITICAL ENGINEERING","SPATIAL EVIDENCE"]
+  ].map(([source,target])=>({source,target}));
+  renderForceNetwork("#practiceChart",nodes,links,"#practiceReadout","MY POSITION");
+}
+
+function initContextMap(token){
+  const container=$("#contextMap");if(!container||!window.mapboxgl)return;
+  if(state.contextMap){state.contextMap.remove();state.contextMap=null;state.contextMapReady=false;}
+  state.contextMap=new mapboxgl.Map({container:"contextMap",style:"mapbox://styles/mapbox/dark-v11",center:[-73.9857,40.735],zoom:10,pitch:0,bearing:0,interactive:true,attributionControl:false});
+  state.contextMap.addControl(new mapboxgl.NavigationControl({showCompass:false}),"top-right");
+  state.contextMap.on("load",()=>{
+    state.contextMapReady=true;$("#contextMapPlaceholder")?.classList.add("hidden");
+    state.contextMap.addSource("context-restaurants",{type:"geojson",data:geojson(state.all)});
+    state.contextMap.addLayer({id:"context-density",type:"heatmap",source:"context-restaurants",maxzoom:15,paint:{"heatmap-weight":["interpolate",["linear"],["coalesce",["to-number",["get","score"]],0],0,0.35,40,1],"heatmap-intensity":["interpolate",["linear"],["zoom"],8,.7,14,2.4],"heatmap-color":["interpolate",["linear"],["heatmap-density"],0,"rgba(5,5,5,0)",.2,"#3a0710",.45,"#741020",.7,"#c51b35",1,"#ff2845"],"heatmap-radius":["interpolate",["linear"],["zoom"],8,10,14,30],"heatmap-opacity":.85}});
+    state.contextMap.addLayer({id:"context-grade-c",type:"circle",source:"context-restaurants",filter:["==",["get","grade"],"C"],layout:{visibility:"none"},paint:{"circle-radius":["interpolate",["linear"],["zoom"],9,3,15,9],"circle-color":"#ff7583","circle-stroke-color":"#fff","circle-stroke-width":1,"circle-opacity":.85}});
+  });
+}
+function updateContextMapData(){if(state.contextMapReady&&state.contextMap.getSource("context-restaurants"))state.contextMap.getSource("context-restaurants").setData(geojson(state.filtered));}
+function setContextLayer(layer){state.contextLayer=layer;if(!state.contextMapReady)return;state.contextMap.setLayoutProperty("context-density","visibility",layer==="density"?"visible":"none");state.contextMap.setLayoutProperty("context-grade-c","visibility",layer==="gradeC"?"visible":"none");}
+
+function renderSituatedChart(){
+  const root=clearRoot("#situatedChart");if(root.empty())return;
+  const data=[
+    {label:"PLATFORM RULES",visibility:18,power:95,desc:"High operational power, low public visibility."},
+    {label:"STREET RISK",visibility:64,power:72,desc:"Observable in space, but rarely included in platform pay calculations."},
+    {label:"RESTAURANT WAIT",visibility:48,power:62,desc:"Experienced directly by workers but inconsistently represented in customer-facing records."},
+    {label:"BATTERY COST",visibility:31,power:56,desc:"A worker expense that the platform depends on but does not own."},
+    {label:"WEATHER",visibility:86,power:68,desc:"Visible to everyone, yet the embodied exposure remains uneven."},
+    {label:"WORKER TESTIMONY",visibility:39,power:88,desc:"Crucial situated evidence that is often absent from official platform datasets."}
+  ];
+  const w=620,h=390,m={t:18,r:60,b:32,l:150};const x=d3.scaleLinear().domain([0,100]).range([m.l,w-m.r]);const y=d3.scaleBand().domain(data.map(d=>d.label)).range([m.t,h-m.b]).padding(.28);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Visibility index for situated components of delivery work");
+  svg.append("g").attr("class","chart-grid").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat(d=>`${d}%`).tickSize(-(h-m.t-m.b))).call(g=>g.select(".domain").remove());
+  const g=svg.selectAll(".situated-bar").data(data).join("g").attr("class",(d,i)=>`situated-bar${i===0?" active":""}`).on("click",(event,d)=>{g.classed("active",n=>n.label===d.label);const r=$("#situatedReadout");r.querySelector("span").textContent=`VISIBILITY ${d.visibility}% · POWER ${d.power}%`;r.querySelector("h3").textContent=d.label;r.querySelector("p").textContent=d.desc;});
+  g.append("rect").attr("x",m.l).attr("y",d=>y(d.label)).attr("height",y.bandwidth()).attr("width",d=>x(d.visibility)-m.l);
+  g.append("text").attr("x",m.l-12).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("text-anchor","end").attr("dominant-baseline","middle").text(d=>d.label);
+  g.append("text").attr("class","situated-value").attr("x",d=>x(d.visibility)+8).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("dominant-baseline","middle").text(d=>`${d.visibility}%`);
+}
+
+function renderMethodsChart(){
+  const root=clearRoot("#methodsChart");if(root.empty())return;
+  const total=state.all.length||1;const withScore=state.all.filter(d=>Number.isFinite(d.score)).length;const geocoded=state.all.filter(d=>Number.isFinite(d.lat)&&Number.isFinite(d.lng)).length;
+  const data=[
+    {label:"GEOCODED RECORDS",value:geocoded/total*100,color:"#ff2845"},
+    {label:"WITH INSPECTION SCORE",value:withScore/total*100,color:"#c51b35"},
+    {label:"WITH LETTER GRADE",value:state.all.filter(d=>["A","B","C"].includes(d.grade)).length/total*100,color:"#941124"},
+    {label:"WORKER TESTIMONY IN DATASET",value:0,color:"#3d0a12"}
+  ];
+  const w=940,h=270,m={t:20,r:80,b:36,l:245};const x=d3.scaleLinear().domain([0,100]).range([m.l,w-m.r]);const y=d3.scaleBand().domain(data.map(d=>d.label)).range([m.t,h-m.b]).padding(.32);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Data completeness audit");
+  svg.append("g").attr("class","chart-grid").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat(d=>`${d}%`).tickSize(-(h-m.t-m.b))).call(g=>g.select(".domain").remove());
+  svg.selectAll(".method-bar").data(data).join("rect").attr("x",m.l).attr("y",d=>y(d.label)).attr("height",y.bandwidth()).attr("fill",d=>d.color).attr("width",0).transition().duration(650).attr("width",d=>x(d.value)-m.l);
+  svg.selectAll(".chart-label").data(data).join("text").attr("class","chart-label").attr("x",m.l-12).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("text-anchor","end").attr("dominant-baseline","middle").text(d=>d.label);
+  svg.selectAll(".chart-value").data(data).join("text").attr("class","chart-value").attr("x",d=>x(d.value)+9).attr("y",d=>y(d.label)+y.bandwidth()/2).attr("dominant-baseline","middle").text(d=>`${d.value.toFixed(1)}%`);
+  const metrics=$("#methodsMetrics");if(metrics){const values=[state.all.length,state.all.filter(d=>Number.isFinite(d.lat)&&Number.isFinite(d.lng)).length,withScore,new Set(state.all.map(d=>d.cuisine)).size];[...metrics.querySelectorAll("b")].forEach((b,i)=>b.textContent=values[i]?values[i].toLocaleString():"—");}
+}
+
+function renderVisualEncoding(){
+  const root=clearRoot("#visualEncodingChart");if(root.empty())return;
+  const risk=Number($("#visualRiskSlider")?.value||40);$("#visualRiskLabel").textContent=`${risk}%`;
+  const w=980,h=300;const points=[[55,230],[180,155],[315,205],[470,105],[640,145],[820,55],[930,85]];const line=d3.line().curve(d3.curveCatmullRom.alpha(.55));
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Interactive visual encoding demonstration");
+  const opacity=.25+risk/100*.75;const width=2+risk/100*9;const dash=risk<35?"14 9":risk<70?"8 5":"3 3";
+  svg.append("path").attr("d",line(points)).attr("class","visual-route").attr("stroke",`rgba(255,40,69,${opacity})`).attr("stroke-width",width).attr("stroke-dasharray",dash);
+  svg.selectAll("circle").data(points).join("circle").attr("class","visual-point").attr("cx",d=>d[0]).attr("cy",d=>d[1]).attr("r",5+risk/100*7).attr("stroke-width",2+risk/100*3);
+  const annotations=[{x:100,y:55,label:"LINE WEIGHT"},{x:390,y:250,label:"ALERT DENSITY"},{x:720,y:235,label:"ANNOTATION INTENSITY"}];
+  svg.selectAll(".visual-annotation").data(annotations).join("text").attr("class","visual-annotation").attr("x",d=>d.x).attr("y",d=>d.y).text(d=>`${d.label} · ${risk}%`);
+  for(let i=0;i<Math.round(risk/8);i++){svg.append("line").attr("x1",70+i*70).attr("x2",110+i*70).attr("y1",270-(i%3)*9).attr("y2",270-(i%3)*9).attr("stroke","#941124").attr("stroke-width",2);}
+}
+
+function renderArgumentChart(){
+  const root=clearRoot("#argumentChart");if(root.empty())return;
+  const data=OFFICIAL_DATA.payTrend;const w=850,h=330,m={t:24,r:42,b:55,l:70};const keys=state.argumentTotalMode?["total"]:["pay","tips"];
+  const x0=d3.scaleBand().domain(data.map(d=>d.period)).range([m.l,w-m.r]).padding(.35);const x1=d3.scaleBand().domain(keys).range([0,x0.bandwidth()]).padding(.08);const y=d3.scaleLinear().domain([0,d3.max(data,d=>d3.max(keys,k=>d[k]))*1.2]).nice().range([h-m.b,m.t]);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Delivery worker pay and tips comparison");
+  svg.append("g").attr("class","chart-grid").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d=>`$${d}`).tickSize(-(w-m.l-m.r))).call(g=>g.select(".domain").remove());
+  svg.append("g").attr("class","chart-axis").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x0));
+  const groups=svg.selectAll(".pay-group").data(data).join("g").attr("transform",d=>`translate(${x0(d.period)},0)`);
+  groups.selectAll("rect").data(d=>keys.map(key=>({key,value:d[key]}))).join("rect").attr("x",d=>x1(d.key)).attr("y",h-m.b).attr("width",x1.bandwidth()).attr("height",0).attr("fill",d=>d.key==="pay"?"#ff2845":d.key==="tips"?"#941124":"#ff7583").transition().duration(650).attr("y",d=>y(d.value)).attr("height",d=>h-m.b-y(d.value));
+  groups.selectAll("text").data(d=>keys.map(key=>({key,value:d[key]}))).join("text").attr("class","chart-value").attr("x",d=>x1(d.key)+x1.bandwidth()/2).attr("y",d=>y(d.value)-8).attr("text-anchor","middle").text(d=>`$${d.value.toFixed(2)}`);
+  const legend=svg.append("g").attr("transform",`translate(${m.l},${h-12})`);keys.forEach((key,i)=>{legend.append("rect").attr("x",i*130).attr("width",11).attr("height",11).attr("fill",key==="pay"?"#ff2845":key==="tips"?"#941124":"#ff7583");legend.append("text").attr("class","chart-note").attr("x",17+i*130).attr("y",10).text(key.toUpperCase());});
+}
+
+function renderCapstoneChart(){
+  const root=clearRoot("#capstoneChart");if(root.empty())return;
+  const phases=[
+    {id:"LISTEN",start:0,end:3,label:"FALL 2026 · LISTEN",desc:"Build trust, establish consent, and identify what workers want documented or kept private."},
+    {id:"COLLECT",start:2,end:6,label:"FALL 2026 · COLLECT",desc:"Gather worker-authored traces, testimony, screenshots, and field observations."},
+    {id:"PROTOTYPE",start:5,end:9,label:"WINTER 2027 · PROTOTYPE",desc:"Test secure interfaces for route annotation, unpaid-time evidence, and contestation."},
+    {id:"GOVERN",start:8,end:12,label:"SPRING 2027 · GOVERN",desc:"Define access, ownership, retention, refusal, and collective decision-making rules."},
+    {id:"EXHIBIT",start:10,end:14,label:"SPRING 2027 · EXHIBIT",desc:"Combine software, public argument, printed evidence, and physical representation."}
+  ];
+  const w=1050,h=390,m={t:30,r:45,b:58,l:170};const x=d3.scaleLinear().domain([0,14]).range([m.l,w-m.r]);const y=d3.scaleBand().domain(phases.map(d=>d.id)).range([m.t,h-m.b]).padding(.32);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Capstone research roadmap");
+  svg.append("g").attr("class","chart-grid").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(7).tickFormat(d=>`M${d+1}`).tickSize(-(h-m.t-m.b))).call(g=>g.select(".domain").remove());
+  const bars=svg.selectAll(".roadmap-bar").data(phases).join("rect").attr("class",(d,i)=>`roadmap-bar${i===0?" active":""}`).attr("x",d=>x(d.start)).attr("y",d=>y(d.id)).attr("height",y.bandwidth()).attr("width",d=>x(d.end)-x(d.start)).on("click",(event,d)=>{bars.classed("active",n=>n.id===d.id);const r=$("#capstoneReadout");r.querySelector("span").textContent=d.label;r.querySelector("h3").textContent=d.id==="LISTEN"?"RELATIONSHIPS BEFORE SOFTWARE":d.id;r.querySelector("p").textContent=d.desc;});
+  svg.selectAll(".roadmap-label").data(phases).join("text").attr("class","roadmap-label").attr("x",m.l-12).attr("y",d=>y(d.id)+y.bandwidth()/2).attr("text-anchor","end").attr("dominant-baseline","middle").text(d=>d.id);
+  svg.selectAll(".roadmap-date").data(phases).join("text").attr("class","roadmap-date").attr("x",d=>x(d.start)+10).attr("y",d=>y(d.id)+y.bandwidth()/2).attr("dominant-baseline","middle").text(d=>`${d.end-d.start} MONTHS`);
+}
+
+function renderChallengeChart(){
+  const root=clearRoot("#challengeChart");if(root.empty())return;
+  const data=[
+    {id:"WORKER TRUST",impact:5,readiness:1.5,desc:"High impact, low current readiness. The next step is relationship-building rather than feature-building."},
+    {id:"SENSITIVE LOCATION DATA",impact:5,readiness:2.2,desc:"Route traces can expose homes, routines, immigration status, and work patterns."},
+    {id:"MISSING WAIT DATA",impact:4.3,readiness:2.8,desc:"Public datasets rarely capture restaurant waiting, parking, and deactivation."},
+    {id:"MAPBOX + D3",impact:3.2,readiness:4.1,desc:"The current technical foundation is strong enough for iterative prototyping."},
+    {id:"VISUAL ARGUMENT",impact:4,readiness:3.7,desc:"The representation is coherent but must avoid substituting aesthetics for evidence."},
+    {id:"POLICY INTERPRETATION",impact:4.2,readiness:3,desc:"Rules change over time and require careful legal and worker-centered interpretation."}
+  ];
+  const w=730,h=470,m={t:35,r:35,b:65,l:75};const x=d3.scaleLinear().domain([1,5]).range([m.l,w-m.r]);const y=d3.scaleLinear().domain([1,5]).range([h-m.b,m.t]);
+  const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Challenge impact and readiness matrix");
+  const midX=x(3),midY=y(3);[[m.l,m.t,midX-m.l,midY-m.t],[midX,m.t,w-m.r-midX,midY-m.t],[m.l,midY,midX-m.l,h-m.b-midY],[midX,midY,w-m.r-midX,h-m.b-midY]].forEach(d=>svg.append("rect").attr("class","matrix-quadrant").attr("x",d[0]).attr("y",d[1]).attr("width",d[2]).attr("height",d[3]));
+  svg.append("g").attr("class","chart-axis").attr("transform",`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(5));svg.append("g").attr("class","chart-axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5));
+  svg.append("text").attr("class","chart-note").attr("x",(m.l+w-m.r)/2).attr("y",h-15).attr("text-anchor","middle").text("CURRENT READINESS →");svg.append("text").attr("class","chart-note").attr("transform","rotate(-90)").attr("x",-(m.t+h-m.b)/2).attr("y",20).attr("text-anchor","middle").text("PROJECT IMPACT →");
+  const g=svg.selectAll(".matrix-point").data(data).join("g").attr("class",(d,i)=>`matrix-point${i===0?" active":""}`).attr("transform",d=>`translate(${x(d.readiness)},${y(d.impact)})`).on("click",(event,d)=>{g.classed("active",n=>n.id===d.id);const r=$("#challengeReadout");r.querySelector("span").textContent=`IMPACT ${d.impact}/5 · READINESS ${d.readiness}/5`;r.querySelector("h3").textContent=d.id;r.querySelector("p").textContent=d.desc;});
+  g.append("circle").attr("r",d=>8+d.impact*2.5);g.append("text").attr("x",14).attr("y",4).text(d=>d.id);
+}
+
+function renderExhibitionChart(){
+  const root=clearRoot("#exhibitionChart");if(root.empty())return;
+  const data=[
+    {id:"DRAWING",x:75,y:35,w:170,h:340,label:"36 × 72 IN",desc:"Suspended from the Avery 100 rail; the route becomes the spine connecting platform, street, worker, and policy layers."},
+    {id:"OBJECT",x:330,y:260,w:150,h:115,label:"24 × 18 IN",desc:"Delivery bag and extended thermal receipt placed on a black plinth next to the drawing."},
+    {id:"SCREEN",x:555,y:135,w:260,h:155,label:"SECOND SCREEN",desc:"Live Mapbox and D3 demo with a recorded backup video for reliable presentation."}
+  ];
+  const w=900,h=450;const svg=root.append("svg").attr("viewBox",`0 0 ${w} ${h}`).attr("role","img").attr("aria-label","Scaled exhibition component layout");
+  svg.append("line").attr("x1",35).attr("x2",865).attr("y1",395).attr("y2",395).attr("stroke","rgba(255,255,255,.18)");
+  const g=svg.selectAll(".install-component").data(data).join("g").attr("class",(d,i)=>`install-component${i===0?" active":""}`).on("click",(event,d)=>{g.classed("active",n=>n.id===d.id);const r=$("#exhibitionReadout");r.querySelector("span").textContent=d.id==="DRAWING"?"PRINTED DRAWING":d.id==="OBJECT"?"MATERIAL-SPATIAL GESTURE":"OPTIONAL SECOND SCREEN";r.querySelector("h3").textContent=d.id==="DRAWING"?"36 × 72 INCH VERTICAL DATASCAPE":d.label;r.querySelector("p").textContent=d.desc;});
+  g.append("rect").attr("x",d=>d.x).attr("y",d=>d.y).attr("width",d=>d.w).attr("height",d=>d.h);
+  g.append("text").attr("x",d=>d.x+d.w/2).attr("y",d=>d.y+d.h/2-6).text(d=>d.id);g.append("text").attr("class","install-dimension").attr("x",d=>d.x+d.w/2).attr("y",d=>d.y+d.h/2+16).text(d=>d.label);
+  svg.append("text").attr("class","chart-note").attr("x",450).attr("y",430).attr("text-anchor","middle").text("AVERY 100 · ELEVATION / TABLE SETUP · PROVISIONAL SCALE");
+}
+
+function renderLiveFoundationVisuals(){renderTitleMetrics();renderMethodsChart();}
+function renderFoundationVisuals(){renderTitleMetrics();renderQuestionsChart();renderKeywordsChart();renderFieldsChart();renderLineageChart();renderPracticeChart();renderSituatedChart();renderMethodsChart();renderVisualEncoding();renderArgumentChart();renderCapstoneChart();renderChallengeChart();renderExhibitionChart();}
+
+$("#questionMode")?.addEventListener("click",event=>{state.questionShareMode=!state.questionShareMode;event.currentTarget.textContent=state.questionShareMode?"SHOW HOURS":"SHOW SHARE";renderQuestionsChart();});
+$("#argumentMode")?.addEventListener("click",event=>{state.argumentTotalMode=!state.argumentTotalMode;event.currentTarget.textContent=state.argumentTotalMode?"SHOW PAY + TIPS":"SHOW TOTAL";renderArgumentChart();});
+$("#visualRiskSlider")?.addEventListener("input",renderVisualEncoding);
+$$('[data-context-layer]').forEach(button=>button.addEventListener("click",()=>{$$('[data-context-layer]').forEach(b=>b.classList.remove("active"));button.classList.add("active");setContextLayer(button.dataset.contextLayer);}));
+
+function observeReveals() {
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add("visible");}),{threshold:.12});
+  $$(".reveal").forEach(node=>observer.observe(node));
+}
+
+function updateScrollUI() {
+  const total=document.documentElement.scrollHeight-window.innerHeight;
+  el.progress.style.width=`${total>0?window.scrollY/total*100:0}%`;
+  const sections=$$("main section[id]");
+  let active=sections[0]?.id;
+  sections.forEach(section=>{if(section.getBoundingClientRect().top<=window.innerHeight*.38)active=section.id;});
+  $$(".topbar nav a").forEach(link=>link.classList.toggle("active",link.getAttribute("href")===`#${active}`));
+}
+
+el.tokenButton.addEventListener("click",openTokenPanel);
+el.placeholderTokenButton.addEventListener("click",openTokenPanel);
+el.closeToken.addEventListener("click",closeTokenPanel);
+el.connectMap.addEventListener("click",()=>initMap(el.tokenInput.value));
+el.tokenInput.addEventListener("keydown",event=>{if(event.key==="Enter")initMap(el.tokenInput.value);});
+el.clearToken.addEventListener("click",()=>{localStorage.removeItem("ib_mapbox_token");state.token="";el.tokenInput.value="";el.tokenButton.classList.remove("connected");el.tokenMessage.textContent="Saved token cleared.";if(state.map){state.map.remove();state.map=null;state.mapReady=false;}if(state.contextMap){state.contextMap.remove();state.contextMap=null;state.contextMapReady=false;}el.mapPlaceholder.classList.remove("hidden");$("#contextMapPlaceholder")?.classList.remove("hidden");});
+
+el.search.addEventListener("input",applyFilters);
+el.borough.addEventListener("change",applyFilters);
+el.grade.addEventListener("change",applyFilters);
+el.reset.addEventListener("click",()=>{el.search.value="";el.borough.value="ALL";el.grade.value="ALL";state.scoreRange=null;el.scoreLabel.textContent="ALL SCORES";applyFilters();});
+el.sync.addEventListener("change",()=>{state.syncViewport=el.sync.checked;drawCharts(currentChartData());});
+el.routeToColumbia.addEventListener("click",()=>setDestination([-73.9626,40.8075]));
+el.clearRoute.addEventListener("click",()=>clearRoute(true));
+el.tipSlider.addEventListener("input",()=>{state.tipPercent=Number(el.tipSlider.value);renderCart();});
+
+el.waitSlider.addEventListener("input",()=>{state.scenario.wait=Number(el.waitSlider.value);updateCase();});
+el.pickupSlider.addEventListener("input",()=>{state.scenario.pickup=Number(el.pickupSlider.value);updateCase();});
+el.riskSlider.addEventListener("input",()=>{state.scenario.risk=Number(el.riskSlider.value);updateCase();});
+
+el.placeOrder.addEventListener("click",()=>{el.orderNumber.textContent=`ORDER #${Date.now().toString().slice(-6)}`;el.confirmation.hidden=false;document.body.classList.add("no-scroll");});
+el.closeConfirmation.addEventListener("click",()=>{el.confirmation.hidden=true;document.body.classList.remove("no-scroll");state.cart=[];renderCart();});
+
+window.addEventListener("scroll",updateScrollUI,{passive:true});
+window.addEventListener("resize",()=>{clearTimeout(window.__resizeTimer);window.__resizeTimer=setTimeout(()=>{drawCharts(currentChartData());drawVisibilityChart(calculateCase());renderFoundationVisuals();state.map?.resize();state.contextMap?.resize();},120);});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"){closeTokenPanel();if(!el.confirmation.hidden)el.closeConfirmation.click();}});
+
+renderFoundationVisuals();
+observeReveals();
+updateScrollUI();
+renderCart();
+updateCase();
+const savedToken=localStorage.getItem("ib_mapbox_token") || DEFAULT_MAPBOX_TOKEN;
+el.tokenInput.value=savedToken;
+initMap(savedToken);
+loadData();
+
+</script>
+</body>
+</html>

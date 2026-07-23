@@ -1,0 +1,10 @@
+{
+  "unique_ids": true,
+  "section_count": 15,
+  "page_logic_blocks": 15,
+  "all_sections_have_page_logic": true,
+  "d3_visual_containers": 17,
+  "mapbox_containers": 2,
+  "author_present": true,
+  "navigation_present": true
+}
